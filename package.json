@@ -1,0 +1,30 @@
+{
+  "name": "webnote-web",
+  "version": "0.0.0",
+  "description": "markdown note in brower",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.23",
+    "tailwindcss": "^3.3.2",
+    "typescript": "^4.9.5",
+    "vite": "^4.1.1",
+    "vite-plugin-solid": "^2.5.0"
+  },
+  "dependencies": {
+    "@solidjs/router": "^0.8.2",
+    "@types/highlightjs": "^10.1.0",
+    "@types/katex": "^0.16.0",
+    "highlightjs": "^9.16.2",
+    "katex": "^0.16.7",
+    "mitt": "^3.0.0",
+    "solid-icons": "^1.0.4",
+    "solid-js": "^1.6.10"
+  }
+}

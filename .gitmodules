@@ -1,0 +1,3 @@
+[submodule "lib"]
+	path = lib
+	url = git@e.coding.net:zanilia/webnote/zeditor.git

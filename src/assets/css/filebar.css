@@ -1,0 +1,19 @@
+.folder-title{
+	background-color: #fafafa;
+	width: 100%;
+	padding: 10px;
+}
+
+
+.file-warp{
+	height: 70px;
+	width: 100%;
+	padding-left:10px;
+	padding-top: 15px;
+    border: 1px solid #eeeeee;
+	background-color: #fafafa;
+}
+
+.file-selected{
+	background-color: #eeeeee;
+}
