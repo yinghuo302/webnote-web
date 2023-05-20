@@ -13,7 +13,7 @@ export function Modal() {
 	return (
 		<Show when={state().open}>
 			<Portal mount={document.body}>
-				<div class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true" onclick={()=> setState({open:false,component:state().component})}>
+				<div class="relative z-20" aria-labelledby="modal-title" role="dialog" aria-modal="true" onclick={()=> setState({open:false,component:state().component})}>
 					<div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 					<div class="fixed inset-0 z-10 overflow-y-auto">
 						<div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">

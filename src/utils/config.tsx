@@ -1,4 +1,6 @@
+import { ValidComponent } from "solid-js";
 import { bus } from ".";
+import { alterTable, createTable, FileMenu, ImgUpLoad, openFileMenu, uploadImg } from "../components/utils";
 import { saveFile } from "./method";
 
 const file_menu:IMenuItem = {
@@ -11,15 +13,30 @@ const file_menu:IMenuItem = {
 			bus.emit('FileBar')
 		}
 	},{
-		content:"导入",
+		content:"新建文件",
 		className:"toolbar-menus-level2",
+		click(editor, e) {
+			openFileMenu('create')
+		},
 	},{
-		content:"导出为PDF",
+		content:"删除文件",
 		className:"toolbar-menus-level2",
+		click(editor, e) {
+			openFileMenu('delete')
+		},
+	},{
+		content:"重命名文件",
+		className:"toolbar-menus-level2",
+		click(editor, e) {
+			openFileMenu('rename')
+		},
+	},{
+		content:"上传图像",
+		className:"toolbar-menus-level2",
+		click:uploadImg
 	},{
 		content:"保存",
 		className:"toolbar-menus-level2",
-		click:saveFile
 	},{
 		content:"分享",
 		className:"toolbar-menus-level2"
@@ -74,21 +91,39 @@ const inline_format:IMenuItem ={
 	subMenu:[{
 		content:"粗体",
 		className:"toolbar-menus-level2",
+		click(editor, e) {
+			editor.setInlineFormat('bold')
+		},
 	},{
 		content:"斜体",
 		className:"toolbar-menus-level2",
+		click(editor,e){
+			editor.setInlineFormat('em')
+		}
 	},{
 		content:"删除线",
 		className:"toolbar-menus-level2",
+		click(editor,e){
+			editor.setInlineFormat('del')
+		}
 	},{
 		content:"行内代码",
 		className:"toolbar-menus-level2",
+		click(editor,e){
+			editor.setInlineFormat('code')
+		}
 	},{
 		content:"超链接",
 		className:"toolbar-menus-level2",
+		click(editor,e){
+			editor.setInlineFormat('link')
+		}
 	},{
 		content:"图像",
 		className:"toolbar-menus-level2",
+		click(editor,e){
+			editor.setInlineFormat('img')
+		}
 	}]
 }
 
@@ -98,18 +133,33 @@ const block_format:IMenuItem = {
 	subMenu:[{
 		content:"引用",	
 		className:"toolbar-menus-level2",
+		click(editor,e){
+			editor.setBlockFormat('quote')
+		}
 	},{
 		content:"无序列表",
 		className:"toolbar-menus-level2",
+		click(editor,e){
+			editor.setBlockFormat('ul')
+		}
 	},{
 		content:"有序列表",
 		className:"toolbar-menus-level2",
+		click(editor,e){
+			editor.setBlockFormat('ol')
+		}
 	},{
 		content:"代码块",
 		className:"toolbar-menus-level2",
+		click(editor,e){
+			editor.setBlockFormat('code')
+		}
 	},{
 		content:"公式块",
 		className:"toolbar-menus-level2",
+		click(editor,e){
+			editor.setBlockFormat('math')
+		}
 	}]
 }
 
@@ -119,24 +169,29 @@ const table_menu:IMenuItem = {
 	subMenu:[{
 		content:"左对齐",	
 		className:"toolbar-menus-level2",
+		click(editor, e) {
+			editor.alignTableItem('left')
+		},
 	},{
 		content:"右对齐",
 		className:"toolbar-menus-level2",
+		click(editor, e) {
+			editor.alignTableItem('right')
+		},
 	},{
 		content:"居中",
 		className:"toolbar-menus-level2",
+		click(editor, e) {
+			editor.alignTableItem('center')
+		},
 	},{
-		content:"在下方添加一行",
+		content:"修改表格大小",
 		className:"toolbar-menus-level2",
+		click:alterTable
 	},{
-		content:"在下方添加一行",
+		content:"插入表格",
 		className:"toolbar-menus-level2",
-	},{
-		content:"在左侧加一行",
-		className:"toolbar-menus-level2",
-	},{
-		content:"在下方添加一行",
-		className:"toolbar-menus-level2",
+		click:createTable
 	}]
 }
 

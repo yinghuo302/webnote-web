@@ -68,11 +68,11 @@ const Login = () => {
 		<div class="w-[550px] h-[550px] flex justify-center items-center">
 			<div class="w-[400px] space-y-6">
 				<h2 class='text-center text-2xl font-bold w-full'>注册登录</h2>
-				<form class="space-y-6 w-full" action="#">
+				<div class="space-y-6 w-full">
 					<div class='w-full'>
 						<label for="email" class="block text-sm font-medium leading-6 text-gray-900">邮箱</label>
 						<div class="mt-2">
-							<input id="nickname" name="email" type="text" autocomplete="email" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" onInput={(e) => setEmail(e.target.value)}/>
+							<input id="nickname" name="email" type="text" autocomplete="email" class="block w-full rounded-md border-0 p-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600 focus:ring-2 focus:ring-inset  sm:text-sm sm:leading-6" onInput={(e) => setEmail(e.target.value)}/>
 						</div>
 					</div>
 
@@ -81,7 +81,7 @@ const Login = () => {
 							<label for="password" class="block text-sm font-medium leading-6 text-gray-900">密码</label>
 						</div>
 						<div class="mt-2">
-							<input id="password" name="password" type="password" autocomplete="current-password" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" onInput={(e) => setPassword(e.target.value)} />
+							<input id="password" name="password" type="password" autocomplete="current-password" class="block w-full rounded-md border-0 p-1.5 text-gray-900 ring-1 shadow-sm ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6" onInput={(e) => setPassword(e.target.value)} />
 						</div>
 					</div>
 
@@ -89,17 +89,17 @@ const Login = () => {
 						<div class='w-full'>
 							<label for="email" class="block text-sm font-medium leading-6 text-gray-900">验证码</label>
 							<div class="mt-2 flex flex-row h-10 overflow-hidden justify-between">
-								<input id="nickname" name="email" type="text" autocomplete="email" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" onInput={(e) => setCode(e.target.value)}/>
+								<input id="nickname" name="email" type="text" autocomplete="email" class="block w-full rounded-md border-0 p-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600 focus:ring-2 focus:ring-inset  sm:text-sm sm:leading-6" onInput={(e) => setCode(e.target.value)}/>
 								<button class="h-full w-[140px] bg-slate-200" disabled={codeDisabled()} onclick={codeHandler} >{codeText()}</button>
 							</div>
 						</div>
 					</Show>
 					<div class='w-full'>
-						<button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" onclick={handleSubmit}>
+						<button class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" onclick={handleSubmit}>
 							{loginFlag() ? "登录" : "注册/重置"}
 						</button>
 					</div>
-				</form>
+				</div>
 
 				<div class='text-lg text-center leading-6'>
 					<a href="#" class="font-semibold  text-indigo-600 hover:text-indigo-500" onclick={changeFlag}>

@@ -13,8 +13,11 @@ type MyEvent = {
 	EditorLoad:IEditor,
 	ReName:string,
 	Login:void,
+	Logout:void,
 	FileBar:void,
-	FileOp:FileOpInfo,
+	FileOp:IFileOP,
+	SideBar:void,
+	PageChange:number,
 	Modal:{
 		component:ValidComponent,
 		open:boolean,

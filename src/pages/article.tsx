@@ -1,4 +1,4 @@
-import { useParams } from "@solidjs/router"
+import { A, useParams } from "@solidjs/router"
 import { createResource, createSignal, onMount, Show } from "solid-js"
 import { MdRender } from "../../lib"
 import { getArticle } from "../utils/method"
@@ -35,7 +35,11 @@ export function Article(){
 	})
 	return <Show when={article()}>
 		<div class="w-full h-full flex flex-col p-10">
-			<UserInfo user={article().user}></UserInfo>
+			<div class="w-full flex flex-row justify-between">
+				<UserInfo user={article().user}></UserInfo>
+				<A class="font-semibold text-indigo-600 hover:text-indigo-500" href="/community">返回首页</A>
+			</div>
+			
 			<ArticleContent mdtext={article().content}></ArticleContent>
 		</div>
 	</Show>

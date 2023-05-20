@@ -38,7 +38,7 @@ export namespace ajax {
 				xhr.send(JSON.stringify(data));
 			}
 			else{
-				xhr.setRequestHeader('Content-Type', 'application/x-www-form-rulencoded');
+				// xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 				data = (dataType=='queryStr')? undefined: data
 				xhr.send(data)
 			}

@@ -22,7 +22,7 @@ render(
 	() => (
 		<>
 			<Modal></Modal>
-			<div class='flex flex-row w-screen h-screen'>
+			<div class='fixed top-0 left-0 flex flex-row w-screen h-screen'>
 				<Router>
 					<Sidebar></Sidebar>
 					<Routes>

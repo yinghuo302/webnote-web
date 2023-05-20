@@ -17,25 +17,14 @@ interface IArticle{
 interface IFileOP{
 	type:string,
 	name:string,
-	folder:string,
-	description:string
-	uuid?:string
-	newFolder?:string
-	newFile?:string
+	otherName?:string
 }
 
 
 interface IFileList{
-	folder?:string
 	name:string
 	description:string
 	uuid?:string
-}
-
-
-interface IFoldList{
-	name:string,
-	files:IFileList[]
 }
 
 interface IUser{
