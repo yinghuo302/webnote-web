@@ -13,8 +13,8 @@ const Login = () => {
 
 	const handleSubmit = (e: Event) => {
 		var promise = ajax.ajax({
-			type: loginFlag() ? "GET" : "POST",
-			url: loginFlag() ? "/api/signin" : "/api/signup",
+			type: "POST",
+			url: loginFlag() ? "/api/public/signin" : "/api/public/signup",
 			data: {
 				email: email(), passwd: password(), code: code()
 			},
@@ -34,13 +34,15 @@ const Login = () => {
 		var time = 60;
 		let promise = ajax.ajax({
 			type: "GET",
-			url: "/api/code",
+			url: "/api/public/code",
+			dataType:"queryStr",
 			data: {
 				email: email()
 			},
-			responseType: 'string'
+			responseType: 'json'
 		})
 		promise.then((res) => {
+			console.log(res)
 			if (res.status == 'success') {
 				timer = setInterval(function () {
 					if (time <= 0) {

@@ -1,9 +1,10 @@
 import bg from "../assets/imgs/community-bg.jpg"
 import { ArticleInfo } from "../components/articleinfo"
 import { createEffect, createSignal, onMount } from "solid-js"
-import { searchArticle } from "../utils/method"
 import { Pagination } from "../components/pagination"
 import { MyButton, MyInput } from "../components/utils"
+import { ajax } from "../utils"
+import notify from "../components/notify"
 export default function Community() {
 	const [items, setItems] = createSignal<IArticle[]>([])
 	const [curPage, setCurPage] = createSignal(1)
@@ -11,11 +12,28 @@ export default function Community() {
 	let input: HTMLInputElement
 	const setInput = (el: HTMLInputElement) => { input = el }
 	createEffect(() => {
-		setItems(searchArticle(input.value, curPage()))
+		searchArticle(input.value, curPage())
 	})
+	function searchArticle(keywd: string, pageNum: number = 1) {
+		let promise = ajax.ajax({
+			type: "GET",
+			url: "/api/public/articles",
+			data: { keywd: keywd ,page:pageNum},
+		})
+		promise.then((res) => {
+			if (res.status != "success")
+				notify("danger", "文章列表获取失败")
+			else {
+				setItems(res.articles)
+				if (res.pages) setMaxPage(res.pages)
+			}
+		}, () => {
+			notify("danger", "服务器连接失败");
+		})
+	}
 	onMount(() => {
 		setCurPage(1)
-		setItems(searchArticle(''))
+		searchArticle('')
 	})
 	return <div class="w-full h-full overflow-scroll">
 		<header style={{
@@ -37,7 +55,7 @@ export default function Community() {
 						type: "text", placeholder: "搜索", refCallback: setInput
 					}}></MyInput>
 					<div class="w-32"><MyButton button="搜索" onclick={(e) => {
-						setItems(searchArticle(input.value))
+						searchArticle(input.value)
 					}}></MyButton></div>
 				</div>
 			</div>

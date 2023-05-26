@@ -67,7 +67,7 @@ export function ImgUpLoad() {
 		let fd = new FormData(form_ele)
 		let promise = ajax.ajax({
 			type: 'POST',
-			url: '/api/avatar',
+			url: '/api/public/img',
 			dataType: 'raw',
 			data: fd,
 		})
@@ -86,7 +86,7 @@ export function ImgUpLoad() {
 					<p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
 					<p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
 				</div>
-				<input id="dropzone-file" type="file" class="hidden" accept="image/*" oninput={upload} />
+				<input name="file" id="dropzone-file" type="file" class="hidden" accept="image/*" oninput={upload} />
 			</label>
 		</form>
 	)
@@ -102,16 +102,21 @@ export function SizeInput(props: { editor: IEditor, type: "create" | "alter" }) 
 		type: "number", placeholder: "请输入表格列数", refCallback: setInput2
 	}]
 	let button_str = (props.type == 'create' ? "创建表格" : "修改表格大小")
+	const click = function(){
+		if(props.type=='create')
+			props.editor.createTable(Number(input1.value), Number(input2.value)); 
+		else
+			props.editor.alterTable(Number(input1.value),Number(input2.value))
+		bus.emit('Modal', { open: false, component: null })
+	}
 	return <div class="w-[300px] h-[300px] mx-32 flex flex-col space-y-6 justify-center items-center">
-		<MultiInput items={items} button={button_str} onclick={
-			(e) => { props.editor.alterTable(Number(input1.value), Number(input2.value)); bus.emit('Modal', { open: false, component: null }) }
-		}></MultiInput>
+		<MultiInput items={items} button={button_str} onclick={click}></MultiInput>
 	</div>
 }
 
 export function createTable(editor: IEditor) {
 	bus.emit('Modal', {
-		open: true, component: <SizeInput editor={editor} type="alter"></SizeInput> as ValidComponent
+		open: true, component: <SizeInput editor={editor} type="create"></SizeInput> as ValidComponent
 	})
 }
 

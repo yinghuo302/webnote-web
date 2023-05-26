@@ -1,7 +1,7 @@
 import { ValidComponent } from "solid-js";
 import { bus } from ".";
 import { alterTable, createTable, FileMenu, ImgUpLoad, openFileMenu, uploadImg } from "../components/utils";
-import { saveFile } from "./method";
+import { shareFile } from "./method";
 
 const file_menu:IMenuItem = {
 	content:"文件",
@@ -37,9 +37,17 @@ const file_menu:IMenuItem = {
 	},{
 		content:"保存",
 		className:"toolbar-menus-level2",
+		click(editor,e){
+			bus.emit('FileOp',{type:"save"})
+		}
 	},{
 		content:"分享",
-		className:"toolbar-menus-level2"
+		className:"toolbar-menus-level2",
+		click(editor, e) {
+			bus.emit('FileOp',{
+				type:"share"
+			})
+		},
 	}]
 }
 
@@ -92,25 +100,25 @@ const inline_format:IMenuItem ={
 		content:"粗体",
 		className:"toolbar-menus-level2",
 		click(editor, e) {
-			editor.setInlineFormat('bold')
+			editor.setInlineFormat('**')
 		},
 	},{
 		content:"斜体",
 		className:"toolbar-menus-level2",
 		click(editor,e){
-			editor.setInlineFormat('em')
+			editor.setInlineFormat('*')
 		}
 	},{
 		content:"删除线",
 		className:"toolbar-menus-level2",
 		click(editor,e){
-			editor.setInlineFormat('del')
+			editor.setInlineFormat('~')
 		}
 	},{
 		content:"行内代码",
 		className:"toolbar-menus-level2",
 		click(editor,e){
-			editor.setInlineFormat('code')
+			editor.setInlineFormat('`')
 		}
 	},{
 		content:"超链接",

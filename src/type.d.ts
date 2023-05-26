@@ -7,8 +7,8 @@ interface IMenuItem{
 }
 
 interface IArticle{
-	uuid:string,
-	title:string,
+	fileId:string,
+	name:string,
 	user?:IUser
 	description:string,
 	content?:string
@@ -16,7 +16,7 @@ interface IArticle{
 
 interface IFileOP{
 	type:string,
-	name:string,
+	name?:string,
 	otherName?:string
 }
 
@@ -24,11 +24,11 @@ interface IFileOP{
 interface IFileList{
 	name:string
 	description:string
-	uuid?:string
+	fileId?:string
 }
 
 interface IUser{
-	name:string,
-	avator:string,
+	nickname:string,
+	avatar:string,
 	description:string
 }

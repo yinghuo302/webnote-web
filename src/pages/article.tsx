@@ -1,15 +1,16 @@
 import { A, useParams } from "@solidjs/router"
-import { createResource, createSignal, onMount, Show } from "solid-js"
+import { createSignal, onMount, Show } from "solid-js"
 import { MdRender } from "../../lib"
-import { getArticle } from "../utils/method"
+import notify from "../components/notify"
+import { ajax } from "../utils"
 function UserInfo(props:{user:IUser}) {
 	return (
 	  <div role="list" class="divide-y divide-gray-100">
 		<div class="flex justify-between gap-x-6 py-5">
 			<div class="flex gap-x-4">
-			  <img class="h-12 w-12 flex-none rounded-full bg-gray-50" src={props.user.avator} alt="" />
+			  <img class="h-12 w-12 flex-none rounded-full bg-gray-50" src={props.user.avatar} alt="" />
 			  <div class="min-w-0 flex-auto">
-				<p class="text-sm font-semibold leading-6 text-gray-900">{props.user.name}</p>
+				<p class="text-sm font-semibold leading-6 text-gray-900">{props.user.nickname}</p>
 				<p class="mt-1 truncate text-xs leading-5 text-gray-500">{props.user.description}</p>
 			  </div>
 			</div>
@@ -30,6 +31,26 @@ function ArticleContent(props:{mdtext:string}){
 export function Article(){
 	const params = useParams()
 	const [article,setArticle] = createSignal<IArticle>()
+	function getArticle(id: string) {
+	
+		let ret:IArticle
+		let promise = ajax.ajax({
+			type:"GET",
+			url:"/api/public/article",
+			data:{id:id},
+		})
+		promise.then((res)=>{
+			if(res.status!="success")
+				notify("danger","文章列表获取失败")
+			else
+				setArticle(res.article)
+		},()=>{
+			notify("danger","服务器连接失败");
+		})
+		return ret
+	}
+	
+
 	onMount(()=>{
 		setArticle(getArticle(params.id))
 	})

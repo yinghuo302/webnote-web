@@ -1,51 +1,47 @@
 export namespace ajax {
-	function createXHR(): XMLHttpRequest{
-		if (window.XMLHttpRequest) 
+	function createXHR(): XMLHttpRequest {
+		if (window.XMLHttpRequest)
 			return new XMLHttpRequest();
-		else 
+		else
 			return new ActiveXObject("Microsoft.XMLHTTP");
 	}
 
 	export function ajax(params: {
-		type: string,            
-		url: string,   
-		data?: any,    
-		dataType?: string,
-		responseType?:string,      
-		isAsync?: boolean        
+		type: string,
+		url: string,
+		data?: any,
+		dataType?: "json" | "queryStr" | "raw",
+		responseType?: "json" | "text" | "raw",
+		isAsync?: boolean
 	}): Promise<any> {
 
-		let type = params.type.toUpperCase();
-		let url = params.url;
-		let data = params.data ? params.data : {};
-		let dataType = params.dataType ? params.dataType : "json";
-		let responseType = params.responseType? params.responseType: "json"
-		let isAsync = params.isAsync ? params.isAsync : true;
-		
+		params.type = params.type.toUpperCase()
+		if (!params.dataType) params.dataType = params.type=="GET"? "queryStr" : "json";
+		if (!params.responseType) params.responseType = "json";
+		if (params.isAsync == undefined) params.isAsync = true;
 		let xhr = createXHR();
-		
-
 		return new Promise((resolve, reject) => {
-			if(dataType=='queryStr'){
+			if (params.dataType == 'queryStr' && params.data) {
 				let qureyStr = "";
-				Object.keys(data).forEach(key => qureyStr += `${key}=${data[key]}&`);
-				qureyStr = qureyStr.slice(0, -1);	
-				url += `?${qureyStr}`;
+				Object.keys(params.data).forEach(key => qureyStr += `${key}=${params.data[key]}&`);
+				qureyStr = qureyStr.slice(0, -1);
+				params.url += `?${qureyStr}`;
 			}
-			xhr.open(type, url, isAsync);
-			if(dataType=='json'){
+			xhr.open(params.type, params.url, params.isAsync);
+			if (params.dataType == 'json') {
 				xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-				xhr.send(JSON.stringify(data));
+				xhr.send(JSON.stringify(params.data));
 			}
-			else{
-				// xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-				data = (dataType=='queryStr')? undefined: data
-				xhr.send(data)
+			else if (params.dataType == 'queryStr') {
+				xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+				xhr.send()
+			} else if (params.dataType == 'raw') {
+				xhr.send(params.data)
 			}
 			xhr.onreadystatechange = function () {
 				if (xhr.readyState === 4) {
 					if (xhr.status >= 200 && xhr.status <= 300 || xhr.status == 304) {
-						let res = responseType == "json"? JSON.parse(xhr.responseText) : xhr.responseText;
+						let res = params.responseType == "json" ? JSON.parse(xhr.responseText) : xhr.responseText;
 						resolve(res);
 					} else {
 						reject(xhr.readyState);
