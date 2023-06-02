@@ -70,7 +70,7 @@ export function Files() {
 	})
 	return (
 		<For each={files()}>
-			{(item) => <div class="file-warp" data-uuid={item.fileId} onclick={(e) => {
+			{(item) => <div class="h-16 w-full pl-1 pt-2 border-solid border" data-uuid={item.fileId} onclick={(e) => {
 				setSelectFile(item); getFileContent(window['editor'], item);
 			}} style={{
 				background: (selectFile()&&item.name == selectFile().name) ? "#eeeeee" : "#fafafa"

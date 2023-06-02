@@ -31,8 +31,10 @@ export default function User() {
 			data:fd,
 		})
 		promise.then((ret) => {
-			if(ret.status=='success')
+			if(ret.status=='success'){
 				setImgUrl(ret.url)
+				localStorage.setItem("user-avatar",ret.url)
+			}
 			else
 				notify('warning',"修改失败")
 		}, () => {
