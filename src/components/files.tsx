@@ -1,4 +1,4 @@
-import { createSignal, For, onMount } from "solid-js"
+import { createRoot, createSignal, For, onMount } from "solid-js"
 import { ajax, bus } from "../utils"
 import { getFileContent, shareFile } from "../utils/method"
 import notify from "./notify"
@@ -9,14 +9,15 @@ export function Files() {
 	const [selectFile, setSelectFile] = createSignal<IFileList>()
 	function saveFile(editor: IEditor,file:IFileList):IFileList {
 		if(!file) return
+		let content = editor.getMd()
 		let promise = ajax.ajax({
 			type: 'POST',
 			url: "/api/private/file",
 			data: {
 				name: file.name,
-				description: editor.getDescription(),
+				description: content.substring(0,30),
 				fileId: file.fileId,
-				content:editor.getMd()
+				content:content
 			}
 		})
 		promise.then((ret) => {
@@ -46,6 +47,10 @@ export function Files() {
 		})
 	}
 	onMount(initFiles)
+	bus.on('Login',initFiles)
+	bus.on('Logout',()=>{
+		setFiles([])
+	})
 	bus.on('FileOp', (op) => {
 		if (op.type == 'create') {
 			setSelectFile({ name: op.name, description: "" })

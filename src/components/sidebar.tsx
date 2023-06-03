@@ -17,10 +17,27 @@ const Sidebar = () => {
 				setUser(val.user)
 				localStorage.setItem("user-avatar",val.user.avatar)
 			} else {
-				notify("danger", "用户信息获取失败")
+				notify("warning", "未登录")
 			}
 		}, () => {
 			notify("danger", "用户信息获取失败")
+		})
+	}
+	function logout(){
+		let promise = ajax.ajax({
+			type: "GET",
+			url: "/api/private/user",
+		})
+		promise.then((val) => {
+			if (val.status == 'success') {
+				setUser(null)
+				localStorage.removeItem("user-avatar")
+				bus.emit('Logout')
+			} else {
+				notify("danger", "注销失败")
+			}
+		}, () => {
+			notify("danger", "服务器失败")
 		})
 	}
 	bus.on('SideBar', () => {
@@ -29,9 +46,6 @@ const Sidebar = () => {
 	bus.on('Login', () => {
 		getUser()
 		bus.emit('Modal', { component: null, open: false })
-	})
-	bus.on('Logout',()=>{
-		setUser(null)
 	})
 	onMount(getUser)
 	return <Show when={state()}>
@@ -54,9 +68,7 @@ const Sidebar = () => {
 						component: <Login></Login> as ValidComponent
 					})
 				}}>登录</button>
-				<button class="my-0 p-2 w-full bg-slate-200 text-center" onclick={
-					() => { bus.emit('Logout');  }
-				} >注销</button>
+				<button class="my-0 p-2 w-full bg-slate-200 text-center" onclick={logout} >注销</button>
 			</div>
 		</div>
 	</Show>

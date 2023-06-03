@@ -41,11 +41,11 @@ export default function User() {
 			notify('danger','服务器连接失败')
 		})
 	}
-	return <div class="w-full h-full flex flex-col adjust-center items-center p-10 space-y-6">
+	return <div class="w-full h-full flex flex-col adjust-center items-center p-10">
 		<h1 class="text-3xl my-5">用户信息修改</h1>
-		<img class="w-40 h-40 rounded-full" src={imgUrl()} />
+		<img class="w-40 h-40 rounded-full m-0" src={imgUrl()} />
 
-		<form class="flex items-center justify-center w-full" ref={form_ele}>
+		<form class="flex items-center justify-center w-full mt-6" ref={form_ele}>
 			<label for="dropzone-file" class="flex flex-col items-center justify-center w-max h-max">
 				<div class="flex w-full justify-center rounded-md bg-indigo-600 px-3 p-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">选择头像</div>
 				<input id="dropzone-file" name="file" type="file" accept="image/*" class="hidden" onchange={upload} />

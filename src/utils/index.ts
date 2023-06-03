@@ -3,8 +3,6 @@ import mitt from "mitt"
 import { ValidComponent } from "solid-js";
 
 type MyEvent = {
-	EditorLoad:IEditor,
-	ReName:string,
 	Login:void,
 	Logout:void,
 	FileBar:void,
@@ -15,7 +13,6 @@ type MyEvent = {
 		component:ValidComponent,
 		open:boolean,
 	}
-	searchArticles:IArticle[]
 }
 
 export const bus = mitt<MyEvent>();

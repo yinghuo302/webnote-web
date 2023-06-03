@@ -180,6 +180,11 @@ const table_menu: IMenuItem = {
 	}, {
 		content: "插入表格",
 		click: createTable
+	}, {
+		content: "删除表格",
+		click(editor, e) {
+			editor.deleteTable()
+		},
 	}]
 }
 

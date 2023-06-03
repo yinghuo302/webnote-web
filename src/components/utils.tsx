@@ -94,6 +94,7 @@ export function ImgUpLoad() {
 
 export function SizeInput(props: { editor: IEditor, type: "create" | "alter" }) {
 	let input1: HTMLInputElement = null, input2: HTMLInputElement = null
+	let range:Range = null
 	const setInput1 = (el: HTMLInputElement) => { input1 = el }
 	const setInput2 = (el: HTMLInputElement) => { input2 = el }
 	const items: InputItem[] = [{
@@ -104,11 +105,14 @@ export function SizeInput(props: { editor: IEditor, type: "create" | "alter" }) 
 	let button_str = (props.type == 'create' ? "创建表格" : "修改表格大小")
 	const click = function(){
 		if(props.type=='create')
-			props.editor.createTable(Number(input1.value), Number(input2.value)); 
+			props.editor.createTable(range,Number(input1.value), Number(input2.value)); 
 		else
-			props.editor.alterTable(Number(input1.value),Number(input2.value))
+			props.editor.alterTable(range,Number(input1.value),Number(input2.value))
 		bus.emit('Modal', { open: false, component: null })
 	}
+	onMount(()=>{
+		range = getSelection().getRangeAt(0).cloneRange()
+	})
 	return <div class="w-[300px] h-[300px] mx-32 flex flex-col space-y-6 justify-center items-center">
 		<MultiInput items={items} button={button_str} onclick={click}></MultiInput>
 	</div>

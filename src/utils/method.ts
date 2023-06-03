@@ -6,7 +6,7 @@ import { ajax } from "./ajax";
 
 export const getFileContent = function (editor: IEditor,file:IFileList) {
 	if (!file.fileId) {
-		editor.setValue("# 请输入标题\n")
+		editor.setValue("# 请输入标题")
 		return;
 	}
 	let promise = ajax.ajax({

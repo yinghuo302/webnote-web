@@ -28,7 +28,7 @@ function ArticleContent(props:{mdtext:string}){
 	return <div class="md-root" ref={self} style="padding:0px;"></div>
 }
 
-export function Article(){
+export default function Article(){
 	const params = useParams()
 	const [article,setArticle] = createSignal<IArticle>()
 	function getArticle(id: string) {

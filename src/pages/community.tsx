@@ -35,7 +35,7 @@ export default function Community() {
 		setCurPage(1)
 		searchArticle('')
 	})
-	return <div class="w-full h-full overflow-scroll">
+	return <div class="w-full h-full overflow-auto">
 		<header style={{
 			background: "no-repeat center center",
 			"background-image": `url(${bg})`,

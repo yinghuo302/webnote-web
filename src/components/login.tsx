@@ -42,7 +42,6 @@ const Login = () => {
 			responseType: 'json'
 		})
 		promise.then((res) => {
-			console.log(res)
 			if (res.status == 'success') {
 				timer = setInterval(function () {
 					if (time <= 0) {

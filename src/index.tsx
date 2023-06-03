@@ -2,14 +2,14 @@
 import { render } from 'solid-js/web';
 import { Router, Routes, Route } from "@solidjs/router"
 import './index.css';
-import Login from './components/login';
-import EditorPage from './pages/editor';
-import Sidebar from './components/sidebar';
-import { Article } from './pages/article';
-import Community from './pages/community';
-import User from './pages/user';
 import { Modal } from './components/modal';
+import { lazy } from 'solid-js';
 
+const EditorPage = lazy(() => import('./pages/editor'))
+const Sidebar = lazy(() => import('./components/sidebar'))
+const Article = lazy(()=> import('./pages/article'));
+const Community = lazy( ()=>import('./pages/community'))
+const User = lazy(()=>import('./pages/user'))
 const root = document.getElementById('root');
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
@@ -26,7 +26,6 @@ render(
 				<Router>
 					<Sidebar></Sidebar>
 					<Routes>
-						<Route path="/login" component={Login} />
 						<Route path="/" component={EditorPage} />
 						<Route path="/user" component={User} />
 						<Route path="/editor" component={EditorPage} />
