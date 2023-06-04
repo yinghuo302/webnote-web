@@ -8,7 +8,7 @@ const EditorPage = () => {
 	return (
 		<div class="flex flex-row h-full w-full">
 			<FileBar></FileBar>
-			<div class="flex flex-col h-full grow">
+			<div class="flex flex-col h-full grow overflow-auto">
 				<div class="webnote-menu flex flex-row w-full justify-between ">
 					<For each={Config.menu_items}>
 						{(item)=> <MenuItem item={item} ></MenuItem>}

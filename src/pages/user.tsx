@@ -48,7 +48,7 @@ export default function User() {
 		<form class="flex items-center justify-center w-full mt-6" ref={form_ele}>
 			<label for="dropzone-file" class="flex flex-col items-center justify-center w-max h-max">
 				<div class="flex w-full justify-center rounded-md bg-indigo-600 px-3 p-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">选择头像</div>
-				<input id="dropzone-file" name="file" type="file" accept="image/*" class="hidden" onchange={upload} />
+				<input id="dropzone-file" name="file" type="file" accept="image/*" class="hidden" oninput={upload} />
 			</label>
 		</form>
 		<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">

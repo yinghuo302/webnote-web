@@ -1,5 +1,5 @@
 import { bus } from ".";
-import { alterTable, createTable, openFileMenu, uploadImg } from "../components/utils";
+import { alterTable, createTable, importFile, openFileMenu, uploadImg } from "../components/utils";
 
 const file_menu: IMenuItem = {
 	content: "文件",
@@ -21,6 +21,12 @@ const file_menu: IMenuItem = {
 		className: "toolbar-menus-level2",
 		click(editor, e) {
 			openFileMenu('delete')
+		},
+	},{
+		content: "导入Markdown",
+		className: "toolbar-menus-level2",
+		click(editor, e) {
+			importFile(editor)
 		},
 	}, {
 		content: "重命名文件",

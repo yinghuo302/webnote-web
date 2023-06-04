@@ -7,9 +7,9 @@ import { lazy } from 'solid-js';
 
 const EditorPage = lazy(() => import('./pages/editor'))
 const Sidebar = lazy(() => import('./components/sidebar'))
-const Article = lazy(()=> import('./pages/article'));
-const Community = lazy( ()=>import('./pages/community'))
-const User = lazy(()=>import('./pages/user'))
+const Article = lazy(() => import('./pages/article'));
+const Community = lazy(() => import('./pages/community'))
+const User = lazy(() => import('./pages/user'))
 const root = document.getElementById('root');
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
@@ -17,7 +17,12 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 		'Root element not found. Did you forget to add it to your index.html? Or maybe the id attribute got mispelled?',
 	);
 }
-
+window.addEventListener("dragover", function (e) {
+	e.preventDefault();
+}, false);
+window.addEventListener("drop", function (e) {
+	e.preventDefault();
+}, false);
 render(
 	() => (
 		<>

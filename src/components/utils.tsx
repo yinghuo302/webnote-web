@@ -61,32 +61,33 @@ export function FileMenu(props: { type: string }) {
 		<MultiInput items={items} onclick={click} button={button_str}></MultiInput></div>
 }
 
-export function ImgUpLoad() {
-	let form_ele: HTMLFormElement
-	const upload = () => {
-		let fd = new FormData(form_ele)
-		let promise = ajax.ajax({
-			type: 'POST',
-			url: '/api/public/img',
-			dataType: 'raw',
-			data: fd,
-		})
-		promise.then((res) => {
-			navigator.clipboard.writeText(res.url)
-			notify('success', '链接已复制到剪贴板')
-		}, () => {
-			notify('danger', '服务器连接失败')
-		})
+export function UpLoad(props:{tips:string,handler:(FileList)=>any,accept:string}) {
+	function dragEnter(e){
+		e.stopPropagation();
+		e.preventDefault();
 	}
+	
+	function dragOver(e){
+		e.stopPropagation();
+		e.preventDefault();
+	}
+	
+	function drop(e:DragEvent){
+		props.handler(e.dataTransfer.files);
+	}
+
+	function inputHandler(){
+		props.handler( this.files);
+	}
+	
 	return (
-		<form class="flex items-center justify-center w-full" ref={form_ele}>
+		<form class="flex items-center justify-center w-full" ondragenter={dragEnter} ondragend={dragOver} ondragover={dragOver} ondrop={drop} >
 			<label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-				<div class="flex flex-col items-center justify-center pt-5 pb-6">
+				<div class="flex flex-col items-center justify-center w-[300px]">
 					<svg aria-hidden="true" class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-					<p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-					<p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+					<p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">{props.tips}</span></p>
 				</div>
-				<input name="file" id="dropzone-file" type="file" class="hidden" accept="image/*" oninput={upload} />
+				<input name="file" id="dropzone-file" type="file" class="hidden" accept={props.accept} oninput={inputHandler}/>
 			</label>
 		</form>
 	)
@@ -131,13 +132,45 @@ export function alterTable(editor: IEditor) {
 }
 
 export function uploadImg() {
+	const upload = (files:FileList) => {
+		let fd = new FormData();
+		if(files.length==0) return ;
+		fd.append('file',files.item(0))
+		let promise = ajax.ajax({
+			type: 'POST',
+			url: '/api/public/img',
+			dataType: 'raw',
+			data: fd,
+		})
+		promise.then((res) => {
+			navigator.clipboard.writeText(res.url)
+			notify('success', '链接已复制到剪贴板')
+		}, () => {
+			notify('danger', '服务器连接失败')
+		})
+	}
 	bus.emit('Modal', {
-		open: true, component: <ImgUpLoad></ImgUpLoad> as ValidComponent
+		open: true, component: <UpLoad tips="点击或拖拽上传图片" accept="image/*" handler={upload}></UpLoad> as ValidComponent
 	})
 }
 
 export function openFileMenu(type: string) {
 	bus.emit('Modal', {
 		open: true, component: <FileMenu type={type}></FileMenu> as ValidComponent
+	})
+}
+
+export function importFile(editor:IEditor){
+	function readFile(files:FileList){
+		if(files.length==0) return ;
+		files.item(0).text().then((content)=>{
+			editor.setValue(content)
+			bus.emit('Modal',{open:false,component:null})
+		},()=>{
+			notify("danger","导入失败")
+		})
+	}
+	bus.emit('Modal', {
+		open: true, component: <UpLoad tips="点击或拖拽上传Markown" accept=".md,.markdown" handler={readFile}></UpLoad> as ValidComponent
 	})
 }
