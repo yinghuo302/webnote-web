@@ -41,7 +41,7 @@ export function FileMenu(props: { type: string }) {
 		refCallback: setInput1
 	}]
 	let button_str = ''
-	if (props.type == 'create') button_str = '新建文件'
+	if (props.type == 'create'||props.type=="save") button_str = '新建文件'
 	if (props.type == 'delete') button_str = '删除文件'
 	if (props.type == 'rename') {
 		button_str = '重命名文件'

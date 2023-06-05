@@ -98,8 +98,29 @@ export function Files() {
 			setSelectFile({ name: op.name, description: "" })
 			setFiles([...files(), { name: op.name, description: "" }])
 		}
-		if (op.type == 'delete')
-			setFiles(files().filter((item) => item.name != op.name))
+		if (op.type == 'delete'){
+			if(!selectFile()) return
+			if(!selectFile().fileId){
+				setFiles(files().filter((item) => item.name != selectFile().name))
+				setSelectFile(null);
+				(window['editor'] as IEditor).setValue("# 请输入标题")
+				return 
+			} 
+			ajax.ajax({
+				type:"DELETE",
+				url:"/api/private/file?id=" + selectFile().fileId
+			}).then((ret)=>{
+				if(ret.status=='success'){
+					setFiles(files().filter((item) => item.name != op.name))
+					setSelectFile(null);
+					(window['editor'] as IEditor).setValue("# 请输入标题")
+				}
+				else
+					notify('warning','文件删除失败')
+			},()=>{
+				notify('danger','文件列表获取失败')
+			})
+		}
 		if (op.type == 'rename')
 			setFiles(files().map((item) => {
 				return {
@@ -109,7 +130,11 @@ export function Files() {
 				}
 			}))
 		if (op.type == 'save') {
-			if (!selectFile()) { openFileMenu('create'); return; }
+			if(op.name){
+				setSelectFile({ name: op.name, description: "" })
+				setFiles([...files(), { name: op.name, description: "" }])
+			}
+			if (!selectFile()) { openFileMenu('save'); }
 			saveFile(window['editor'], selectFile())
 		}
 		if (op.type == 'share')

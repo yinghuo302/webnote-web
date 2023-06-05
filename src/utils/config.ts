@@ -20,13 +20,7 @@ const file_menu: IMenuItem = {
 		content: "删除文件",
 		className: "toolbar-menus-level2",
 		click(editor, e) {
-			openFileMenu('delete')
-		},
-	},{
-		content: "导入Markdown",
-		className: "toolbar-menus-level2",
-		click(editor, e) {
-			importFile(editor)
+			bus.emit('FileOp', { type: "delete" })
 		},
 	}, {
 		content: "重命名文件",
@@ -35,15 +29,21 @@ const file_menu: IMenuItem = {
 			openFileMenu('rename')
 		},
 	}, {
-		content: "上传图像",
-		className: "toolbar-menus-level2",
-		click: uploadImg
-	}, {
-		content: "保存",
+		content: "保存文件",
 		className: "toolbar-menus-level2",
 		click(editor, e) {
 			bus.emit('FileOp', { type: "save" })
 		}
+	}, {
+		content: "导入Markdown",
+		className: "toolbar-menus-level2",
+		click(editor, e) {
+			importFile(editor)
+		},
+	}, {
+		content: "上传图像",
+		className: "toolbar-menus-level2",
+		click: uploadImg
 	}, {
 		content: "分享",
 		className: "toolbar-menus-level2",

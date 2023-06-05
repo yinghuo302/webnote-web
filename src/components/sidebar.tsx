@@ -26,7 +26,7 @@ const Sidebar = () => {
 	function logout() {
 		let promise = ajax.ajax({
 			type: "GET",
-			url: "/api/private/user",
+			url: "/api/private/logout",
 		})
 		promise.then((val) => {
 			if (val.status == 'success') {

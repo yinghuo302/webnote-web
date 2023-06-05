@@ -55,7 +55,7 @@ export default function Article(){
 		setArticle(getArticle(params.id))
 	})
 	return <Show when={article()}>
-		<div class="w-full h-full flex flex-col p-10">
+		<div class="w-full h-full flex flex-col p-10 overflow-auto">
 			<div class="w-full flex flex-row justify-between">
 				<UserInfo user={article().user}></UserInfo>
 				<A class="font-semibold text-indigo-600 hover:text-indigo-500" href="/community">返回首页</A>
