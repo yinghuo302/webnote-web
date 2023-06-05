@@ -43,7 +43,7 @@ export default function User() {
 	}
 	return <div class="w-full h-full flex flex-col adjust-center items-center p-10">
 		<h1 class="text-3xl my-5">用户信息修改</h1>
-		<img class="w-40 h-40 rounded-full m-0" src={imgUrl()} />
+		<img class="w-44 h-44 rounded-full m-0" src={imgUrl()} />
 
 		<form class="flex items-center justify-center w-full mt-6" ref={form_ele}>
 			<label for="dropzone-file" class="flex flex-col items-center justify-center w-max h-max">

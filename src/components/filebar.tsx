@@ -10,7 +10,7 @@ const FileBar = () => {
 	bus.on('FileBar', () => { setFileBarState(!filebarState()) })
 	return (
 		<Show when={filebarState()}>
-			<div class="border-r-2 border-solid h-full w-[200px]">
+			<div class="border-r-2 border-solid h-full w-[200px] flex-shrink-0">
 				<div class="flex flex-row text-center w-full mt-1">
 					<div class="flex flex-col w-1/2" onclick={() => { setState(true) }}>
 						<div>文件</div>

@@ -49,7 +49,7 @@ const Sidebar = () => {
 	})
 	onMount(getUser)
 	return <Show when={state()}>
-		<div class="flex flex-col w-[150px] h-full bg-slate-300">
+		<div class="flex flex-col w-[140px] h-full bg-slate-300 flex-shrink-0">
 			<div class="p-4">
 				<img class="rounded-full w-[100px] h-[100px]" id="avatar" src={user() ? user().avatar : avatar} />
 				<div class="text-center" id="nickname">
