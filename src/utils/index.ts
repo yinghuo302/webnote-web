@@ -1,6 +1,5 @@
 export { ajax } from "./ajax";
 import mitt from "mitt"
-import { ValidComponent } from "solid-js";
 
 type MyEvent = {
 	Login:void,
@@ -9,10 +8,7 @@ type MyEvent = {
 	FileOp:IFileOP,
 	SideBar:void,
 	PageChange:number,
-	Modal:{
-		component:ValidComponent,
-		open:boolean,
-	}
+	Modal:ModalState
 }
 
 export const bus = mitt<MyEvent>();

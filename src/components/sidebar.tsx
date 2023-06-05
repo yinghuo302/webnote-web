@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import { createSignal, onMount, Show, ValidComponent } from "solid-js";
+import { createSignal, onMount, Show, useContext, ValidComponent } from "solid-js";
 import avatar from "../assets/imgs/avatar.png"
 import { ajax, bus } from "../utils";
 import Login from "./login";
@@ -15,7 +15,7 @@ const Sidebar = () => {
 		promise.then((val) => {
 			if (val.status == 'success') {
 				setUser(val.user)
-				localStorage.setItem("user-avatar",val.user.avatar)
+				localStorage.setItem("user-avatar", val.user.avatar)
 			} else {
 				notify("warning", "未登录")
 			}
@@ -23,7 +23,7 @@ const Sidebar = () => {
 			notify("danger", "用户信息获取失败")
 		})
 	}
-	function logout(){
+	function logout() {
 		let promise = ajax.ajax({
 			type: "GET",
 			url: "/api/private/user",
@@ -65,7 +65,7 @@ const Sidebar = () => {
 				<button class="my-0 p-2 w-full bg-slate-200 text-center" onclick={(e) => {
 					bus.emit('Modal', {
 						open: true,
-						component: <Login></Login> as ValidComponent
+						component: Login
 					})
 				}}>登录</button>
 				<button class="my-0 p-2 w-full bg-slate-200 text-center" onclick={logout} >注销</button>

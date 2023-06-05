@@ -1,7 +1,7 @@
 import { Match, Switch, ValidComponent } from "solid-js"
 import { bus } from "../utils"
 
-function Notifications(props: { type: "info"|"warning"|"danger"|"success", content: string }) {
+function Notifications(props: { type: "info" | "warning" | "danger" | "success", content: string }) {
 	return (
 		<Switch>
 			<Match when={props.type == 'info'}>
@@ -78,9 +78,11 @@ function Notifications(props: { type: "info"|"warning"|"danger"|"success", conte
 }
 
 
-export default function notify(type: "info"|"warning"|"danger"|"success", content: string) {
+export default function notify(type: "info" | "warning" | "danger" | "success", content: string) {
 	bus.emit('Modal', {
 		open: true,
-		component: <Notifications type={type} content={content}></Notifications> as ValidComponent
+		component: Notifications,
+		props: { type: type, content: content }
 	})
 }
+

@@ -1,3 +1,9 @@
+type ModalState = {
+	component: any,
+	props?:any
+	open: boolean
+}
+
 interface IMenuItem{
 	content:string
 	tip?:string
