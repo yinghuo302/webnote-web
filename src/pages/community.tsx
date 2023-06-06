@@ -51,7 +51,7 @@ export default function Community() {
 						type: "text", placeholder: "搜索", refCallback: setInput
 					}}></MyInput>
 					<div class="w-32"><MyButton button="搜索" onclick={(e) => {
-						setCurPage(1)
+						if(curPage()!=1) setCurPage(1);else searchArticle(input.value)
 					}}></MyButton></div>
 				</div>
 			</div>
