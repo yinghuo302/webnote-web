@@ -24,17 +24,13 @@ export default function Community() {
 			if (res.status != "success")
 				notify("danger", "文章列表获取失败")
 			else {
-				if (res.pages) {setMaxPage(res.pages); setCurPage(1)}
+				if (res.pages&&pageNum==1) setMaxPage(res.pages);
 				setItems(res.articles)
 			}
 		}, () => {
 			notify("danger", "服务器连接失败");
 		})
 	}
-	onMount(() => {
-		setCurPage(1)
-		searchArticle('')
-	})
 	return <div class="w-full h-full overflow-auto">
 		<header style={{
 			background: "no-repeat center center",
@@ -55,13 +51,13 @@ export default function Community() {
 						type: "text", placeholder: "搜索", refCallback: setInput
 					}}></MyInput>
 					<div class="w-32"><MyButton button="搜索" onclick={(e) => {
-						searchArticle(input.value)
+						setCurPage(1)
 					}}></MyButton></div>
 				</div>
 			</div>
 		</header>
 		<div class="w-full flex flex-col justify-center"><ArticleInfo items={items()}></ArticleInfo></div>
-		<div class="flex justify-center"><Pagination curPage={curPage} setCurPage={setCurPage} maxPage={maxPage()}></Pagination></div>
+		<div class="flex justify-center"><Pagination curPage={curPage} setCurPage={setCurPage} maxPage={maxPage}></Pagination></div>
 
 	</div>
 }
