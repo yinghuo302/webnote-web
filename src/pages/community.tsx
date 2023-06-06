@@ -24,8 +24,8 @@ export default function Community() {
 			if (res.status != "success")
 				notify("danger", "文章列表获取失败")
 			else {
+				if (res.pages) {setMaxPage(res.pages); setCurPage(1)}
 				setItems(res.articles)
-				if (res.pages) setMaxPage(res.pages)
 			}
 		}, () => {
 			notify("danger", "服务器连接失败");

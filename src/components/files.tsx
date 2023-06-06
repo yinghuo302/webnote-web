@@ -111,7 +111,7 @@ export function Files() {
 				url:"/api/private/file?id=" + selectFile().fileId
 			}).then((ret)=>{
 				if(ret.status=='success'){
-					setFiles(files().filter((item) => item.name != op.name))
+					setFiles(files().filter((item) => item.name != selectFile().name))
 					setSelectFile(null);
 					(window['editor'] as IEditor).setValue("# 请输入标题")
 				}
