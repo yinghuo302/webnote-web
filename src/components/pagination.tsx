@@ -23,7 +23,6 @@ export function Pagination(props: { curPage: Accessor<number>, setCurPage: Sette
 		}
 	}
 	onMount(()=>{setPage(1);})
-	createEffect(()=>{setItems(items().filter((item)=>item<=props.maxPage()))})
 	return (
 
 		<nav aria-label="Page navigation example">
