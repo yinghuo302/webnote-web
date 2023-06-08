@@ -7,7 +7,7 @@
 2. 用户分享和搜索笔记的笔记社区
 
 ## 使用方法
-### 安转依赖
+### 安装依赖
 ```bash
 $ npm install # or pnpm install or yarn install
 ```
