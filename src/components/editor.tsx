@@ -1,22 +1,31 @@
 import { onCleanup, onMount } from "solid-js";
 import { bus } from "../utils";
-import ZEditor from "../../lib";
-const Editor = () =>{
-	let root_ele:any = null;
-	onMount(()=>{
-		let editor = new ZEditor(root_ele);
-		editor.setValue("# 请输入标题")
-		window['editor'] = editor
-	});
-	bus.on('Logout',()=>{
-		window['editor'].setValue("# 请输入标题")
-	})
-	onCleanup(()=>{
-		window['editor'] = undefined
-	})
+import MilkdownEditor from "./milkdown-editor";
 
-	return (
-		<div ref={root_ele} class="w-full h-full"/>
-	) 
-}
+const Editor = () => {
+  let root: HTMLDivElement;
+  let editor: MilkdownEditor;
+
+  onMount(() => {
+    editor = new MilkdownEditor(root);
+    window["editor"] = editor;
+  });
+
+  const reset = () => editor?.setValue("# 请输入标题");
+  bus.on("Logout", reset);
+  onCleanup(() => {
+    bus.off("Logout", reset);
+    if (window["editor"] === editor) window["editor"] = undefined;
+    void editor?.destroy();
+  });
+
+  return (
+    <div class="editor-stage">
+      <div class="editor-paper">
+        <div ref={root} class="milkdown-root" />
+      </div>
+    </div>
+  );
+};
+
 export default Editor;

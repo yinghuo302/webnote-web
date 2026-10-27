@@ -1,19 +1,26 @@
-import { createSignal, For, onMount, Show } from "solid-js";
-const MenuItem = (props:{item:IMenuItem}) =>{
-	const [subShow,setSubShow] = createSignal(false)
-	return (
-		<div class="w-1/4 h-7 z-10 float-left text-base bg-slate-100 cursor-default select-none" onmouseover={()=>setSubShow(true)} onmouseout={()=>setSubShow(false)}> 
-			<div class="text-center">{props.item.content}</div>
-			<div>
-				<For each={props.item.subMenu}>
-					{ (item) =>  
-						<div class={item.className +"cursor-default select-none text-center p-1 z-10 bg-white"} style={subShow()?"":"display:none"} onclick={(e)=>{
-							if(item.click) item.click(window['editor'],e)
-						}} >  {item.content}</div>
-					}
-				</For>
-			</div>
-		</div>
-	)
-}
+import { createSignal, For, Show } from "solid-js";
+
+const MenuItem = (props: { item: IMenuItem }) => {
+  const [open, setOpen] = createSignal(false);
+  return (
+    <div class="toolbar-menu-wrap" onMouseLeave={() => setOpen(false)}>
+      <button class="toolbar-menu-button" aria-expanded={open()} onClick={() => setOpen(!open())}>
+        {props.item.content}<span class="toolbar-chevron">⌄</span>
+      </button>
+      <Show when={open()}>
+        <div class="toolbar-dropdown">
+          <For each={props.item.subMenu}>
+            {(item) => (
+              <button class="toolbar-dropdown-item" onClick={(e) => {
+                item.click?.(window["editor"], e);
+                setOpen(false);
+              }}>{item.content}</button>
+            )}
+          </For>
+        </div>
+      </Show>
+    </div>
+  );
+};
+
 export default MenuItem;

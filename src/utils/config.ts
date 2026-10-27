@@ -126,21 +126,6 @@ const inline_format: IMenuItem = {
 const block_format: IMenuItem = {
 	content: "段落格式",
 	subMenu: [{
-		content: "在后面插入一行",
-		click(editor, e) {
-			editor.insertNewLineAfter()
-		}
-	}, {
-		content: "在前面插入一行",
-		click(editor, e) {
-			editor.insertNewLineBefore()
-		}
-	}, {
-		content: "将当前行提升一级",
-		click(editor, e) {
-			editor.promoteLine()
-		}
-	}, {
 		content: "引用",
 		click(editor, e) {
 			editor.setBlockFormat('quote')
@@ -181,16 +166,20 @@ const table_menu: IMenuItem = {
 			editor.alignTableItem('center')
 		},
 	}, {
-		content: "修改表格大小",
-		click: alterTable
-	}, {
 		content: "插入表格",
 		click: createTable
 	}, {
-		content: "删除表格",
-		click(editor, e) {
-			editor.deleteTable()
-		},
+		content: "在当前行下方插入行",
+		click(editor) { (editor as any).addTableRowAfter() }
+	}, {
+		content: "在当前列右侧插入列",
+		click(editor) { (editor as any).addTableColumnAfter() }
+	}, {
+		content: "删除当前行",
+		click(editor) { (editor as any).deleteCurrentTableRow() }
+	}, {
+		content: "删除当前列",
+		click(editor) { (editor as any).deleteCurrentTableColumn() }
 	}]
 }
 
