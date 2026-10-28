@@ -22,7 +22,7 @@ const Editor = () => {
   return (
     <div class="editor-stage">
       <div class="editor-paper">
-        <div ref={root} class="muya-root" />
+        <div ref={root} class="mu-container muya-root" />
       </div>
     </div>
   );

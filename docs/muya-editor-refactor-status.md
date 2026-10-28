@@ -15,8 +15,8 @@
 - 已注册 Muya 内置的行内格式、快速插入、代码语言、表格、图片/链接及预览工具插件。
 - 对 Mermaid/编辑交互问题已追加但待验证的修改：
   - `autoPairMarkdownSyntax: false`，避免 `*`、`~` 等 Markdown 标记自动补齐右半边。
-  - 使用 `MarkdownToHtml.renderHtml()` 在编辑器初始化后立即预热 Mermaid 引擎，避免固定 700ms 延迟让首次流程图更慢。
-  - 给 `body` 下的 Muya 浮动菜单增加高对比亮色覆盖；给活跃代码块的语言标签增加可见样式。
+  - 用 Muya 导出的 `MarkdownToHtml.renderHtml()` 预热 Mermaid；它与图表块共用同一个内部 renderer loader。该预热仅降低 renderer 首次加载成本，不会把普通 code block 自动转换成 Mermaid diagram。
+  - Muya 初始化容器包含其 MarkText 核心样式所需的 `.mu-container` 类；应用不再用自定义的标题/代码/浮动菜单规则覆盖核心样式，只对编辑区宽度和浮层层级做轻量调整。
   - 编辑页提示改为从 `/` 快速插入 Mermaid，以及点击代码块上方语言标签修改语言。
 
 ## Muya 行为要点

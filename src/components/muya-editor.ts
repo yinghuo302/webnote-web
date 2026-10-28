@@ -7,13 +7,13 @@ import {
 import "@muyajs/core/lib/core.css";
 
 let mermaidWarmed = false;
-function warmMermaid(muya: Muya) {
+function warmMermaid() {
   if (mermaidWarmed) return;
   mermaidWarmed = true;
-  // Start loading Mermaid as soon as Muya is initialized. A fixed delay made
-  // the first user-authored diagram pay the full renderer startup cost.
+  // MarkdownToHtml shares Muya's internal lazy renderer cache with diagram
+  // blocks, so this exercises the exact Mermaid renderer used by previews.
   const example = "```mermaid\nflowchart TD\n  Start --> Done\n```";
-  void new MarkdownToHtml(example, muya).renderHtml().catch(() => {
+  void new MarkdownToHtml(example).renderHtml().catch(() => {
     mermaidWarmed = false;
   });
 }
@@ -59,7 +59,7 @@ export class MuyaEditor implements IEditor {
       codeBlockLineNumbers: true,
     });
     this.instance.init();
-    warmMermaid(this.instance);
+    warmMermaid();
   }
 
   setValue(markdown: string) { this.instance?.setContent(markdown || ""); }
