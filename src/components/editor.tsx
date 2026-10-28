@@ -1,13 +1,13 @@
 import { onCleanup, onMount } from "solid-js";
 import { bus } from "../utils";
-import MilkdownEditor from "./milkdown-editor";
+import MuyaEditor from "./muya-editor";
 
 const Editor = () => {
   let root: HTMLDivElement;
-  let editor: MilkdownEditor;
+  let editor: MuyaEditor;
 
   onMount(() => {
-    editor = new MilkdownEditor(root);
+    editor = new MuyaEditor(root);
     window["editor"] = editor;
   });
 
@@ -22,7 +22,7 @@ const Editor = () => {
   return (
     <div class="editor-stage">
       <div class="editor-paper">
-        <div ref={root} class="milkdown-root" />
+        <div ref={root} class="muya-root" />
       </div>
     </div>
   );

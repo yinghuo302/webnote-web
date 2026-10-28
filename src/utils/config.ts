@@ -184,5 +184,5 @@ const table_menu: IMenuItem = {
 }
 
 export class Config {
-	static menu_items: IMenuItem[] = [file_menu, head_menu, inline_format, block_format, table_menu]
+	static menu_items: IMenuItem[] = [file_menu]
 };

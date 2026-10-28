@@ -22,7 +22,7 @@ const EditorPage = () => (
         <div class="toolbar-group-label">编辑</div>
         <For each={Config.menu_items}>{(item) => <MenuItem item={item} />}</For>
         <div class="toolbar-spacer" />
-        <div class="toolbar-hint">快速建表：输入 <code>|3x4|</code> 后按空格（3列 × 4行）</div>
+        <div class="toolbar-hint">流程图：输入 <code>/</code> 选择 Mermaid · 代码语言：点代码块上方标签</div>
       </nav>
       <Editor />
     </section>
