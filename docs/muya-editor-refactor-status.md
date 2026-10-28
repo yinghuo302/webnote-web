@@ -2,11 +2,11 @@
 
 ## 当前状态
 
-- 开发分支：`feature/muya-editor`
+- 开发分支：`feature/muya-editor`。
 - Milkdown 备份点：`backup/milkdown-attempt`，提交 `8d73b80`（`backup current Milkdown editor attempt`）。
-- 当前工作仍包含未提交的 Muya 页面改造；本记录按用户要求暂停后续修复工作。
-- Muya 基础替换阶段曾通过 `npx tsc --noEmit` 和 `npm run build`。**在用户报告 Mermaid、自动补全、代码语言选择及菜单可读性问题后追加的最后一组改动，没有确认完成类型检查或生产构建**：对应并行命令被中断，结果未记录。继续前应先重跑验证。
-- 未做实际浏览器交互验收。
+- Muya 改造和本次文档已提交：`ef49794`（`feat: switch webnote editor to Muya`）；分支已推送至 GitHub 的 `feature/muya-editor`。
+- 按用户要求，编辑器问题修复任务随后暂停。最新自动补全、Mermaid 预热及菜单样式调整发生在上述提交之后，**未确认完成类型检查或生产构建**；对应并行验证命令被中断，结果未记录。继续前应先重跑验证并另行提交。
+- Muya 基础替换阶段此前曾通过 `npx tsc --noEmit` 和 `npm run build`；未做实际浏览器交互验收。
 
 ## 已完成的 Muya 集成
 
@@ -58,6 +58,7 @@ npm run build
 
 ## Git 与推送
 
-- 本次任务所在分支为 `feature/muya-editor`，备份提交 `8d73b80` 已保留。
-- 用户要求推送到 GitHub，但当前 `origin` 是 `git@e.coding.net:zanilia/webnote/webnote-web.git`，不是 GitHub。尚未 push，避免将代码推到错误平台；需要 GitHub remote URL，或用户明确授权把现有 `origin` 作为目标。
-- 当前工作树还有在本次 Muya 任务前就存在的改动（如 `src/components/login.tsx`、`src/components/sidebar.tsx`、`src/components/utils.tsx`、`src/utils/ajax.ts`、`src/utils/index.ts`、`tsconfig.json`、`vite.config.ts` 及 `lib` 子模块）。提交前必须逐项审查，只暂存明确属于 Muya 重构和本次文档的文件，不要夹带这些既有改动。
+- Milkdown 备份提交 `8d73b80` 保留在 `backup/milkdown-attempt`；Muya 代码与 agents 指引已在 `ef49794` 提交。
+- GitHub 目标 `git@github.com:yinghuo302/webnote-web.git` 的 `feature/muya-editor` 分支已推送成功。现有 `origin` 仍是 `git@e.coding.net:zanilia/webnote/webnote-web.git`，本次没有改写它。
+- `ef49794` 提交时只暂存 Muya 相关文件和项目文档。此前就存在的 `src/components/login.tsx`、`src/components/sidebar.tsx`、`src/components/utils.tsx`、`src/utils/ajax.ts`、`src/utils/index.ts`、`tsconfig.json`、`vite.config.ts` 与 `lib` 子模块改动均未夹带。
+- 本文档在 `ef49794` 之后更新；更新后需要另建文档提交并推送同一 GitHub 分支。
