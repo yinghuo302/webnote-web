@@ -15,7 +15,8 @@
 - 已注册 Muya 内置的行内格式、快速插入、代码语言、表格、图片/链接及预览工具插件。
 - 对 Mermaid/编辑交互问题已追加但待验证的修改：
   - `autoPairMarkdownSyntax: false`，避免 `*`、`~` 等 Markdown 标记自动补齐右半边。
-  - 用 Muya 导出的 `MarkdownToHtml.renderHtml()` 预热 Mermaid；它与图表块共用同一个内部 renderer loader。该预热仅降低 renderer 首次加载成本，不会把普通 code block 自动转换成 Mermaid diagram。
+  - 用 Muya 导出的 `MarkdownToHtml.renderHtml()` 预热 Mermaid；它与图表块共用同一个内部 renderer loader。
+  - adapter 监听 Muya 的 `json-change`，当当前活动代码块语言成为 `mermaid` 时，使用 Muya diagram block factory 原位替换，并把光标移入图表源码。后续源码输入沿用原生 diagram preview 的更新路径，保持 Markdown 序列化格式。
   - Muya 初始化容器包含其 MarkText 核心样式所需的 `.mu-container` 类；应用不再用自定义的标题/代码/浮动菜单规则覆盖核心样式，只对编辑区宽度和浮层层级做轻量调整。
   - 编辑页提示改为从 `/` 快速插入 Mermaid，以及点击代码块上方语言标签修改语言。
 
@@ -49,8 +50,8 @@ npm run build
 
 此前 Muya 构建曾产生约 1.56 MB 的编辑器 chunk（gzip 约 465 KB）以及 Vite 大 chunk 警告。需要时再评估拆包。未完成浏览器验证的项目：
 
-1. 通过 `/` 新建 Mermaid diagram，连续编辑内容时确认图形更新速度与错误状态。
-2. 打开已有 ````mermaid` fenced Markdown，确认导入时会转成 diagram block。
+1. 通过 `/` 新建 Mermaid diagram，连续编辑内容时确认图形即时更新与错误状态。
+2. 打开已有 ````mermaid` fenced Markdown，确认导入时会转成 diagram block；再从普通 code block 将语言切换为 `mermaid`，确认会自动转图表并可继续即时编辑。
 3. 输入 `*`、`~`，确认不会自动补齐；同时检查括号/引号配对是否仍符合产品预期。
 4. 在代码块上方语言标签打开语言列表、切换语言，并保存/重新打开。
 5. 检查格式、快速插入、表格、语言列表等浮动菜单在 Tailwind 页面中的颜色、层级、键盘/鼠标交互。

@@ -22,7 +22,7 @@ const EditorPage = () => (
         <div class="toolbar-group-label">编辑</div>
         <For each={Config.menu_items}>{(item) => <MenuItem item={item} />}</For>
         <div class="toolbar-spacer" />
-        <div class="toolbar-hint">流程图：输入 <code>/</code> 选择 Mermaid · 代码语言：点代码块上方标签</div>
+        <div class="toolbar-hint">Mermaid：输入 <code>/</code> 插入，或将代码块语言设为 mermaid · 支持边编辑边预览</div>
       </nav>
       <Editor />
     </section>

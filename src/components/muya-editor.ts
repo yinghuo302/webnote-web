@@ -45,6 +45,37 @@ export class MuyaEditor implements IEditor {
   tem_cursor: ICursor;
   need_update = new Set<HTMLElement>();
   private instance: Muya;
+  private mermaidConversionQueued = false;
+  private destroyed = false;
+
+  private readonly onJsonChange = () => {
+    if (this.mermaidConversionQueued) return;
+    this.mermaidConversionQueued = true;
+    Promise.resolve().then(() => {
+      this.mermaidConversionQueued = false;
+      if (!this.destroyed) this.convertActiveMermaidCodeBlock();
+    });
+  };
+
+  private convertActiveMermaidCodeBlock() {
+    const selection = this.instance.editor.selection.getSelection();
+    const anchorBlock = selection?.anchorBlock as any;
+    const codeBlock = anchorBlock?.getAncestors?.().find((ancestor: any) => ancestor.blockName === "code-block");
+    if (!codeBlock || codeBlock.meta?.lang?.toLowerCase() !== "mermaid") return;
+
+    const cursorOffset = anchorBlock.blockName === "language-input" ? 0 : selection.anchor.offset;
+    const scrollPage = this.instance.editor.scrollPage as any;
+    const diagramFactory = scrollPage?.constructor?.loadBlock("diagram");
+    if (!diagramFactory) return;
+
+    const diagram = diagramFactory.create(this.instance, {
+      name: "diagram",
+      text: codeBlock.lastContentInDescendant()?.text || "",
+      meta: { type: "mermaid", lang: "yaml" },
+    });
+    codeBlock.replaceWith(diagram);
+    diagram.lastContentInDescendant()?.setCursor(cursorOffset, cursorOffset, true);
+  }
 
   constructor(root: HTMLDivElement, initial = "# 请输入标题") {
     this.root_ele = root;
@@ -59,6 +90,7 @@ export class MuyaEditor implements IEditor {
       codeBlockLineNumbers: true,
     });
     this.instance.init();
+    this.instance.on("json-change", this.onJsonChange);
     warmMermaid();
   }
 
@@ -68,7 +100,11 @@ export class MuyaEditor implements IEditor {
     return (this.instance?.getTOC() || []).map((item) => ({ level: item.lvl, title: item.content }));
   }
   getRoot() { return this.root_ele; }
-  destroy() { this.instance?.destroy(); }
+  destroy() {
+    this.destroyed = true;
+    this.instance?.off("json-change", this.onJsonChange);
+    this.instance?.destroy();
+  }
 
   // The old toolbar delegates editing commands through IEditor. Muya's native
   // floating menus now own these interactions; these remain for compatibility.
