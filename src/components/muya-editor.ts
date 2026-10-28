@@ -10,12 +10,12 @@ let mermaidWarmed = false;
 function warmMermaid(muya: Muya) {
   if (mermaidWarmed) return;
   mermaidWarmed = true;
-  window.setTimeout(() => {
-    const example = "```mermaid\nflowchart TD\n  Start --> Done\n```";
-    void new MarkdownToHtml(example, muya).renderHtml().catch(() => {
-      mermaidWarmed = false;
-    });
-  }, 700);
+  // Start loading Mermaid as soon as Muya is initialized. A fixed delay made
+  // the first user-authored diagram pay the full renderer startup cost.
+  const example = "```mermaid\nflowchart TD\n  Start --> Done\n```";
+  void new MarkdownToHtml(example, muya).renderHtml().catch(() => {
+    mermaidWarmed = false;
+  });
 }
 
 function registerPlugins() {
