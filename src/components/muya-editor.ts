@@ -4,7 +4,7 @@ import {
   ParagraphFrontMenu, ParagraphQuickInsertMenu, PreviewToolBar,
   TableColumnToolbar, TableDragBar, TableRowColumMenu,
 } from "@muyajs/core";
-import "@muyajs/core/lib/core.css";
+import { bus } from "../utils";
 
 let mermaidWarmed = false;
 function warmMermaid() {
@@ -39,16 +39,13 @@ function registerPlugins() {
 
 /** Application-facing adapter for Muya while file/save flows are migrated. */
 export class MuyaEditor implements IEditor {
-  root_ele: HTMLDivElement;
-  state = 0;
-  old_cursor: ICursor;
-  tem_cursor: ICursor;
-  need_update = new Set<HTMLElement>();
+  private root_ele: HTMLDivElement;
   private instance: Muya;
   private mermaidConversionQueued = false;
   private destroyed = false;
 
   private readonly onJsonChange = () => {
+    bus.emit("EditorChanged");
     if (this.mermaidConversionQueued) return;
     this.mermaidConversionQueued = true;
     Promise.resolve().then(() => {
@@ -99,25 +96,12 @@ export class MuyaEditor implements IEditor {
   getOutline(): IOutLine[] {
     return (this.instance?.getTOC() || []).map((item) => ({ level: item.lvl, title: item.content }));
   }
-  getRoot() { return this.root_ele; }
+  getRoot() { return (this.instance?.domNode as HTMLDivElement) || this.root_ele; }
   destroy() {
     this.destroyed = true;
     this.instance?.off("json-change", this.onJsonChange);
     this.instance?.destroy();
   }
-
-  // The old toolbar delegates editing commands through IEditor. Muya's native
-  // floating menus now own these interactions; these remain for compatibility.
-  setHeading(_level: number) { this.instance?.focus(); }
-  setInlineFormat(_format: InlineFormat) { this.instance?.focus(); }
-  setBlockFormat(_format: BlockFormat) { this.instance?.focus(); }
-  alignTableItem(_align: TableAlignType) { this.instance?.focus(); }
-  alterTable(_range: Range, _row: number, _col: number) { this.instance?.focus(); }
-  createTable(_range: Range, _row: number, _col: number) { this.instance?.focus(); }
-  deleteTable() { this.instance?.focus(); }
-  insertNewLineBefore() { this.instance?.focus(); }
-  insertNewLineAfter() { this.instance?.focus(); }
-  promoteLine() { this.instance?.focus(); }
 }
 
 export default MuyaEditor;

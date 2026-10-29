@@ -1,32 +1,21 @@
-import { For } from "solid-js";
+import { createSignal } from "solid-js";
 import Editor from "../components/editor";
-import FileBar from "../components/filebar";
-import MenuItem from "../components/MenuItem";
-import { Config } from "../utils/config";
+import WorkspaceSidebar from "../components/workspace-sidebar";
 
-const EditorPage = () => (
-  <main class="workspace-shell">
-    <FileBar />
-    <section class="workspace-main">
-      <header class="workspace-header">
-        <div class="workspace-brand">
-          <div class="workspace-mark">w</div>
-          <div><div class="workspace-title">写作空间</div><div class="workspace-subtitle">把想法，写成值得分享的内容</div></div>
+export default function EditorPage() {
+  const [editor, setEditor] = createSignal<IEditor>();
+  return (
+    <div class="writer-workspace">
+      <WorkspaceSidebar editor={editor()} />
+      <section class="writer-canvas" aria-label="Markdown 写作区">
+        <div class="canvas-caption">
+          <span class="canvas-caption-dot" />
+          <span>Markdown · GFM</span>
+          <span class="canvas-caption-separator">/</span>
+          <span>Muya 即时渲染</span>
         </div>
-        <div class="workspace-header-right">
-          <span class="workspace-status"><i /> 本地草稿</span>
-          <span class="workspace-shortcut">Markdown · GFM</span>
-        </div>
-      </header>
-      <nav class="workspace-toolbar" aria-label="编辑器工具栏">
-        <div class="toolbar-group-label">编辑</div>
-        <For each={Config.menu_items}>{(item) => <MenuItem item={item} />}</For>
-        <div class="toolbar-spacer" />
-        <div class="toolbar-hint">Mermaid：输入 <code>/</code> 插入，或将代码块语言设为 mermaid · 支持边编辑边预览</div>
-      </nav>
-      <Editor />
-    </section>
-  </main>
-);
-
-export default EditorPage;
+        <Editor onReady={setEditor} />
+      </section>
+    </div>
+  );
+}

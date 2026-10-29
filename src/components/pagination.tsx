@@ -14,11 +14,12 @@ function PaginationItem(props: { curPage: number, pageNum: number,maxPage:number
 }
 
 
-export function Pagination(props: { curPage: Accessor<number>, setCurPage: Setter<number>, maxPage: Accessor<number> }) {
+export function Pagination(props: { curPage: Accessor<number>, setCurPage: Setter<number>, maxPage: Accessor<number>, onPageChange?: (page: number) => void }) {
 	const [items,setItems] = createSignal<Array<number>>([])
 	function setPage(pageNum:number){
 		if(pageNum>0&&pageNum<=props.maxPage()){
 			props.setCurPage(pageNum)
+			props.onPageChange?.(pageNum)
 			setItems([pageNum-2,pageNum-1,pageNum,pageNum+1,pageNum+2])
 		}
 	}

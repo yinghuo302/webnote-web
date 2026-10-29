@@ -1,6 +1,6 @@
 import { A, useParams } from "@solidjs/router"
-import { createSignal, onMount, Show } from "solid-js"
-import { MdRender } from "../../lib"
+import { createSignal, onCleanup, onMount, Show } from "solid-js"
+import { MarkdownToHtml } from "@muyajs/core"
 import notify from "../components/notify"
 import { ajax } from "../utils"
 function UserInfo(props:{user:IUser}) {
@@ -20,12 +20,18 @@ function UserInfo(props:{user:IUser}) {
 }
  
 
-function ArticleContent(props:{mdtext:string}){
-	let self:HTMLDivElement = null
-	onMount(()=>{
-		self.append(...MdRender.render(props.mdtext))
-	})
-	return <div class="md-root" ref={self} style="padding:0px;"></div>
+function ArticleContent(props: { mdtext: string }) {
+  let root!: HTMLDivElement;
+  let active = true;
+  onMount(() => {
+    void new MarkdownToHtml(props.mdtext).renderHtml().then((html) => {
+      if (active && root) root.innerHTML = html;
+    }).catch(() => {
+      if (root) root.textContent = "文章内容暂时无法渲染";
+    });
+  });
+  onCleanup(() => { active = false; });
+  return <article class="article-markdown mu-container" ref={root} />;
 }
 
 export default function Article(){

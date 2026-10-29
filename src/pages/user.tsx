@@ -1,87 +1,93 @@
-import { createSignal, onMount } from "solid-js"
-import notify from "../components/notify"
-import { ajax } from "../utils"
+import { Show } from "solid-js";
+import { refreshSession, sessionUser } from "../utils/session";
+import { ajax, bus } from "../utils";
+import notify from "../components/notify";
+import Login from "../components/login";
+
 export default function User() {
-	const [nickname, setNickName] = createSignal('')
-	const [passwd, setPasswd] = createSignal('')
-	const [desc, setDesc] = createSignal('')
-	const [imgUrl, setImgUrl] = createSignal(localStorage.getItem("user-avatar"))
-	let form_ele:HTMLFormElement
-	function modify() {
-		let promise = ajax.ajax({
-			type: 'POST',
-			url: '/api/private/user',
-			data: { passwd: passwd(), description: desc(), nickname: nickname() },
-		})
-		promise.then((ret) => {
-			if(ret.status=='success')
-				notify('success','修改成功')
-			else
-				notify('warning',"修改失败")
-		}, () => {
-			notify('danger','服务器连接失败')
-		})
-	}
-	const upload = ()=>{
-		let fd = new FormData(form_ele)
-		let promise = ajax.ajax({
-			type:'POST',
-			url:'/api/private/avatar',
-			dataType:'raw',
-			data:fd,
-		})
-		promise.then((ret) => {
-			if(ret.status=='success'){
-				setImgUrl(ret.url)
-				localStorage.setItem("user-avatar",ret.url)
-			}
-			else
-				notify('warning',"修改失败")
-		}, () => {
-			notify('danger','服务器连接失败')
-		})
-	}
-	return <div class="w-full h-full flex flex-col adjust-center items-center p-10">
-		<h1 class="text-3xl my-5">用户信息修改</h1>
-		<img class="w-44 h-44 rounded-full m-0" src={imgUrl()} />
+  let nicknameInput: HTMLInputElement | undefined;
+  let passwordInput: HTMLInputElement | undefined;
+  let descriptionInput: HTMLInputElement | undefined;
+  let avatarInput: HTMLInputElement | undefined;
 
-		<form class="flex items-center justify-center w-full mt-6" ref={form_ele}>
-			<label for="dropzone-file" class="flex flex-col items-center justify-center w-max h-max">
-				<div class="flex w-full justify-center rounded-md bg-indigo-600 px-3 p-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">选择头像</div>
-				<input id="dropzone-file" name="file" type="file" accept="image/*" class="hidden" oninput={upload} />
-			</label>
-		</form>
-		<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-			<div class="space-y-6">
-				<div>
-					<label for="nickname" class="block text-sm font-medium leading-6 text-gray-900">昵称</label>
-					<div class="mt-2">
-						<input name="nickname" type="text" autocomplete="email" class="block w-full rounded-md border-0 p-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" oninput={(e)=>setNickName(e.target.value)} />
-					</div>
-				</div>
+  function requireLogin() {
+    bus.emit("Modal", { open: true, component: Login });
+  }
 
-				<div>
-					<div class="flex items-center justify-between">
-						<label for="password" class="block text-sm font-medium leading-6 text-gray-900">密码</label>
-					</div>
-					<div class="mt-2">
-						<input name="password" type="password" autocomplete="current-password" class="block w-full rounded-md border-0 p-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" oninput={(e)=>setPasswd(e.target.value)} />
-					</div>
-				</div>
+  async function modify(event: Event) {
+    event.preventDefault();
+    try {
+      const result = await ajax.ajax({
+        type: "POST",
+        url: "/api/private/user",
+        data: {
+          nickname: nicknameInput?.value || "",
+          passwd: passwordInput?.value || "",
+          description: descriptionInput?.value || "",
+        },
+      });
+      if (result?.status === "success") {
+        await refreshSession();
+        notify("success", "资料已更新");
+      } else notify("warning", "资料更新失败");
+    } catch {
+      notify("danger", "服务器连接失败");
+    }
+  }
 
-				<div>
-					<label for="description" class="block text-sm font-medium leading-6 text-gray-900">描述</label>
-					<div class="mt-2">
-						<input name="description" type="text" autocomplete="email" class="block w-full rounded-md border-0 p-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" oninput={(e)=>setDesc(e.target.value)} />
-					</div>
-				</div>
+  async function uploadAvatar() {
+    const file = avatarInput?.files?.[0];
+    if (!file) return;
+    const form = new FormData();
+    form.append("file", file);
+    try {
+      const result = await ajax.ajax({
+        type: "POST",
+        url: "/api/private/avatar",
+        dataType: "raw",
+        data: form,
+      });
+      if (result?.status !== "success") {
+        notify("warning", "头像上传失败");
+        return;
+      }
+      await refreshSession();
+      notify("success", "头像已更新");
+    } catch {
+      notify("danger", "头像上传失败");
+    }
+  }
 
-				<div>
-					<button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" onclick={modify}>修改信息</button>
-				</div>
+  return (
+    <section class="user-page">
+      <Show when={sessionUser()} fallback={
+        <div class="user-login-notice">
+          <span class="sidebar-eyebrow">ACCOUNT</span>
+          <h1>用户中心</h1>
+          <p>登录后可管理头像、昵称和个人介绍。未登录时仍可使用写作空间及本地草稿。</p>
+          <button class="user-submit" onClick={requireLogin}>登录 / 注册</button>
+        </div>
+      }>
+        {(user) => (
+          <form class="user-page-card" onSubmit={modify}>
+            <h1>用户中心</h1>
+            <img class="user-avatar" src={user().avatar} alt="用户头像" />
+            <label for="avatar">更换头像</label>
+            <input ref={avatarInput} id="avatar" type="file" accept="image/*" onChange={uploadAvatar} />
 
+            <label for="nickname">昵称</label>
+            <input ref={nicknameInput} id="nickname" type="text" value={user().nickname || ""} />
 
-			</div>
-		</div>
-	</div>
+            <label for="description">个人介绍</label>
+            <input ref={descriptionInput} id="description" type="text" value={user().description || ""} />
+
+            <label for="password">新密码（留空则不修改）</label>
+            <input ref={passwordInput} id="password" type="password" autocomplete="new-password" />
+
+            <button class="user-submit" type="submit">保存资料</button>
+          </form>
+        )}
+      </Show>
+    </section>
+  );
 }

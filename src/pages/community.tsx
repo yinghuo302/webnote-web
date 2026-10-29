@@ -1,63 +1,53 @@
-import bg from "../assets/imgs/community-bg.jpg"
-import { ArticleInfo } from "../components/articleinfo"
-import { createEffect, createSignal, onMount } from "solid-js"
-import { Pagination } from "../components/pagination"
-import { MyButton, MyInput } from "../components/utils"
-import { ajax } from "../utils"
-import notify from "../components/notify"
-export default function Community() {
-	const [items, setItems] = createSignal<IArticle[]>([])
-	const [curPage, setCurPage] = createSignal(1)
-	const [maxPage, setMaxPage] = createSignal(1)
-	let input: HTMLInputElement
-	const setInput = (el: HTMLInputElement) => { input = el }
-	createEffect(() => {
-		searchArticle(input.value, curPage())
-	})
-	function searchArticle(keywd: string, pageNum: number = 1) {
-		let promise = ajax.ajax({
-			type: "GET",
-			url: "/api/public/articles",
-			data: { keywd: keywd ,page:pageNum},
-		})
-		promise.then((res) => {
-			if (res.status != "success")
-				notify("danger", "文章列表获取失败")
-			else {
-				if (res.pages&&pageNum==1) setMaxPage(res.pages);
-				setItems(res.articles)
-			}
-		}, () => {
-			notify("danger", "服务器连接失败");
-		})
-	}
-	return <div class="w-full h-full overflow-auto">
-		<header style={{
-			background: "no-repeat center center",
-			"background-image": `url(${bg})`,
-			"background-size": "cover"
-		}}>
-			<nav class="flex justify-between text-white items-center">
-				<h1 class="m-5">My Blog</h1>
-				<ul>
-					<li class="inline-block mr-5">Home</li>
-					<li class="inline-block mr-5">About</li>
-					<li class="inline-block mr-5"> Contact</li>
-				</ul>
-			</nav>
-			<div class="flex justify-center items-center h-52">
-				<div class="w-[400px] flex flex-row">
-					<MyInput item={{
-						type: "text", placeholder: "搜索", refCallback: setInput
-					}}></MyInput>
-					<div class="w-32"><MyButton button="搜索" onclick={(e) => {
-						if(curPage()!=1) setCurPage(1);else searchArticle(input.value)
-					}}></MyButton></div>
-				</div>
-			</div>
-		</header>
-		<div class="w-full flex flex-col justify-center"><ArticleInfo items={items()}></ArticleInfo></div>
-		<div class="flex justify-center"><Pagination curPage={curPage} setCurPage={setCurPage} maxPage={maxPage}></Pagination></div>
+import { createSignal } from "solid-js";
+import { Pagination } from "../components/pagination";
+import { ArticleInfo } from "../components/articleinfo";
+import { ajax } from "../utils";
+import notify from "../components/notify";
 
-	</div>
+export default function Community() {
+  const [items, setItems] = createSignal<IArticle[]>([]);
+  const [curPage, setCurPage] = createSignal(1);
+  const [maxPage, setMaxPage] = createSignal(1);
+  const [keyword, setKeyword] = createSignal("");
+
+  async function searchArticle(page = 1) {
+    try {
+      const result = await ajax.ajax({
+        type: "GET",
+        url: "/api/public/articles",
+        data: { keywd: keyword(), page },
+      });
+      if (result?.status !== "success") {
+        notify("warning", "文章列表获取失败");
+        return;
+      }
+      setMaxPage(Math.max(1, Number(result.pages) || 1));
+      setItems(result.articles || []);
+    } catch {
+      notify("danger", "服务器连接失败");
+    }
+  }
+
+  return (
+    <section class="community-page">
+      <div class="community-hero">
+        <span class="sidebar-eyebrow">COMMUNITY</span>
+        <h1>灵感社区</h1>
+        <p>浏览、搜索并分享值得记录的想法。</p>
+      </div>
+      <form class="community-search" onSubmit={(event) => { event.preventDefault(); setCurPage(1); void searchArticle(1); }}>
+        <input
+          type="search"
+          value={keyword()}
+          placeholder="搜索文章标题或内容"
+          onInput={(event) => setKeyword(event.currentTarget.value)}
+        />
+        <button type="submit">搜索</button>
+      </form>
+      <div class="community-results"><ArticleInfo items={items()} /></div>
+      <div class="community-pagination">
+        <Pagination curPage={curPage} setCurPage={setCurPage} maxPage={maxPage} onPageChange={(page) => { void searchArticle(page); }} />
+      </div>
+    </section>
+  );
 }

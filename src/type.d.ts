@@ -4,12 +4,16 @@ type ModalState = {
 	open: boolean
 }
 
-interface IMenuItem{
-	content:string
-	tip?:string
-	className?:string
-	subMenu?:IMenuItem[]
-	click?:(editor:IEditor,e:Event)=>void
+interface IOutLine {
+  level: number;
+  title: string;
+}
+
+interface IEditor {
+  setValue(markdown: string): void;
+  getMd(): string;
+  getOutline(): IOutLine[];
+  getRoot(): HTMLDivElement;
 }
 
 interface IArticle{
@@ -19,13 +23,6 @@ interface IArticle{
 	description:string,
 	content?:string
 }
-
-interface IFileOP{
-	type:string,
-	name?:string,
-	otherName?:string
-}
-
 
 interface IFileList{
 	name:string

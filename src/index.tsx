@@ -1,46 +1,42 @@
 /* @refresh reload */
-import { render } from 'solid-js/web';
-import { Router, Routes, Route } from "@solidjs/router"
-import './index.css';
-import { Modal } from './components/modal';
-import { lazy } from 'solid-js';
+import { lazy } from "solid-js";
+import { render } from "solid-js/web";
+import { Route, Router, Routes } from "@solidjs/router";
+import "./index.css";
+import "@muyajs/core/lib/core.css";
+import AppHeader from "./components/app-header";
+import { Modal } from "./components/modal";
 
-const EditorPage = lazy(() => import('./pages/editor'))
-const Sidebar = lazy(() => import('./components/sidebar'))
-const Article = lazy(() => import('./pages/article'));
-const Community = lazy(() => import('./pages/community'))
-const User = lazy(() => import('./pages/user'))
-const root = document.getElementById('root');
+const EditorPage = lazy(() => import("./pages/editor"));
+const Article = lazy(() => import("./pages/article"));
+const Community = lazy(() => import("./pages/community"));
+const User = lazy(() => import("./pages/user"));
+const root = document.getElementById("root");
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
-	throw new Error(
-		'Root element not found. Did you forget to add it to your index.html? Or maybe the id attribute got mispelled?',
-	);
+  throw new Error("Root element not found. Add an element with id=\"root\" to index.html.");
 }
-window.addEventListener("dragover", function (e) {
-	e.preventDefault();
-}, false);
-window.addEventListener("drop", function (e) {
-	e.preventDefault();
-}, false);
-render(
-	() => (
-		<>
-			<Modal></Modal>
-			<div class='fixed top-0 left-0 flex flex-row w-screen h-screen'>
-				<Router>
-					<Sidebar></Sidebar>
-					<Routes>
-						<Route path="/" component={EditorPage} />
-						<Route path="/user" component={User} />
-						<Route path="/editor" component={EditorPage} />
-						<Route path="/article/:id" component={Article} />
-						<Route path="/community" component={Community} />
-					</Routes>
-				</Router>
-			</div>
-		</>
-	),
-	root!
-);
 
+window.addEventListener("dragover", (event) => event.preventDefault());
+window.addEventListener("drop", (event) => event.preventDefault());
+
+render(
+  () => (
+    <Router>
+      <Modal />
+      <div class="app-frame">
+        <AppHeader />
+        <main class="app-route-view">
+          <Routes>
+            <Route path="/" component={EditorPage} />
+            <Route path="/editor" component={EditorPage} />
+            <Route path="/community" component={Community} />
+            <Route path="/user" component={User} />
+            <Route path="/article/:id" component={Article} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
+  ),
+  root!,
+);
