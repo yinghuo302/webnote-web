@@ -20,8 +20,8 @@
 - Register Muya UI plugins with `Muya.use(...)` before creating the editor and before `init()`. Keep inline formatting, code language selection, quick insert, preview tools, table controls, images, and links enabled.
 - Keep `autoPairMarkdownSyntax: false`; this prevents unwanted auto-pairing of Markdown markers such as `*` and `~`.
 - `@muyajs/core/lib/core.css` is loaded by the application entry so editor and rendered article views share the MarkText/Muya stylesheet. The host editor must have the `.mu-container` class. Muya floating controls are portaled to `document.body`; style conservatively and do not override their internal controls broadly.
-- Mermaid fences imported from Markdown become native diagram blocks. The adapter converts the active code block when its language becomes `mermaid`; its `diagram-preview` override uses the same Mermaid render chunk as Muya, with unique render IDs and stale-result suppression. Conversion is deferred until clipboard paste settles. Keep `PreviewToolBar` registered.
-- Muya 0.2.0 currently exposes its Mermaid runtime only as a hashed `lib/mermaid.core-*.mjs` chunk. The adapter import is intentionally tied to the pinned exact Muya package version; update the chunk path and verify that the build still emits only one Mermaid runtime when upgrading Muya.
+- Mermaid fences imported from Markdown become native diagram blocks. The adapter converts the active code block when its language becomes `mermaid`; its `diagram-preview` override follows MarkText's Mermaid 12 `render(id, code, target)` flow, with unique IDs and stale-result suppression. Conversion is deferred until clipboard paste settles. Keep `PreviewToolBar` registered.
+- `@muyajs/core@0.2.0` bundles Mermaid 11 internally; the web editor separately pins Mermaid 12.2.0 to match the local MarkText renderer behavior. Keep that dependency and renderer API aligned when upgrading either package.
 - The adapter exposes `setValue()`, `getMd()`, `getOutline()`, and `getRoot()`. Keep file load/save/import/export flows routed through this interface.
 
 ## Validation

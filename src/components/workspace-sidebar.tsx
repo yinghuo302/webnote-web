@@ -44,9 +44,12 @@ export default function WorkspaceSidebar(props: Props) {
   const [tab, setTab] = createSignal<PanelTab>("files");
   const [mode, setMode] = createSignal<"local" | "remote">("local");
   const [pendingContent, setPendingContent] = createSignal<string | null>(null);
+  const [renamingId, setRenamingId] = createSignal<string | null>(null);
+  const [renameValue, setRenameValue] = createSignal("");
   const [savedAt, setSavedAt] = createSignal<number | null>(null);
   const [outline, setOutline] = createSignal<IOutLine[]>([]);
   let importInput: HTMLInputElement | undefined;
+  let renameInput: HTMLInputElement | undefined;
   let autosaveTimer: number | undefined;
   let loadSequence = 0;
 
@@ -256,13 +259,28 @@ export default function WorkspaceSidebar(props: Props) {
     }
   }
 
-  async function renameCurrent() {
+  function renameCurrent() {
     const file = selectedFile();
     if (!file) return;
-    const proposed = prompt("请输入新的文件名", file.name);
-    if (proposed === null) return;
-    const name = safeName(proposed);
-    if (name === file.name) return;
+    setRenamingId(file.id);
+    setRenameValue(file.name);
+    requestAnimationFrame(() => renameInput?.focus());
+  }
+
+  function cancelRename() {
+    setRenamingId(null);
+    setRenameValue("");
+  }
+
+  async function commitRename(event?: Event) {
+    event?.preventDefault();
+    const file = selectedFile();
+    if (!file || renamingId() !== file.id) return;
+    const name = safeName(renameValue());
+    if (!name || name === file.name) {
+      cancelRename();
+      return;
+    }
     const content = props.editor?.getMd() ?? file.content;
     if (file.local || mode() === "local") {
       const next = files().map((item) => item.id === file.id
@@ -270,10 +288,12 @@ export default function WorkspaceSidebar(props: Props) {
         : item);
       setFiles(next);
       persistLocal(next);
-      notify("success", "文件已重命名");
+      notify("success", "文档名已更新");
     } else {
-      await saveRemote(file, content, name);
+      const saved = await saveRemote(file, content, name);
+      if (!saved) return;
     }
+    cancelRename();
   }
 
   async function deleteCurrent() {
@@ -445,23 +465,29 @@ export default function WorkspaceSidebar(props: Props) {
     <aside class="workspace-sidebar" aria-label="文件与大纲侧边栏">
       <div class="sidebar-heading">
         <div>
-          <span class="sidebar-eyebrow">WORKSPACE</span>
-          <h2>资料侧栏</h2>
+          <h2>文档</h2>
+          <p>{mode() === "local" ? "保存在此浏览器" : "云端与本机文档"}</p>
         </div>
-        <span class={`storage-badge ${mode() === "local" ? "is-local" : "is-cloud"}`}>
-          {mode() === "local" ? "本地" : "云端"}
-        </span>
+        <span class="sidebar-count">{files().length}</span>
       </div>
 
-      <div class="sidebar-primary-actions">
-        <button class="side-action side-action-primary" onClick={createFile} title="新建文档"><span>＋</span> 新建</button>
-        <button class="side-action" onClick={saveCurrent} title="保存当前文档"><span>↥</span> 保存</button>
-      </div>
-      <div class="sidebar-secondary-actions">
-        <button onClick={() => importInput?.click()} title="导入 Markdown">导入</button>
-        <button onClick={exportCurrent} title="导出当前 Markdown">导出</button>
-        <button onClick={renameCurrent} title="重命名当前文档">改名</button>
-        <button onClick={deleteCurrent} title="删除当前文档">删除</button>
+      <div class="sidebar-command-panel" aria-label="文档操作">
+        <For each={[
+          { label: "新建", mark: "+", run: createFile },
+          { label: "保存", mark: "↥", run: saveCurrent },
+          { label: "导入", mark: "↓", run: () => importInput?.click() },
+          { label: "导出", mark: "↑", run: exportCurrent },
+          { label: "重命名", mark: "✎", run: renameCurrent },
+          { label: "删除", mark: "−", run: deleteCurrent },
+          { label: "分享", mark: "↗", run: shareCurrent },
+          ...(sessionUser() ? [{ label: "图片", mark: "▧", run: uploadImg }] : []),
+          ...(sessionUser() && selectedFile()?.local ? [{ label: "同步", mark: "⇧", run: syncCurrentToCloud }] : []),
+        ]}>{(action) => (
+          <button class="sidebar-command" type="button" onClick={() => { void action.run(); }} title={action.label}>
+            <span class="command-mark" aria-hidden="true">{action.mark}</span>
+            <span>{action.label}</span>
+          </button>
+        )}</For>
       </div>
       <input ref={importInput} class="visually-hidden" type="file" accept=".md,.markdown,text/markdown" onChange={importMarkdown} />
 
@@ -489,14 +515,28 @@ export default function WorkspaceSidebar(props: Props) {
           <Show when={files().length} fallback={<div class="sidebar-empty"><b>还没有文档</b><span>创建一个本机草稿开始写作</span></div>}>
             <div class="document-list">
               <For each={files()}>{(file) => (
-                <button class={`document-row ${selectedId() === file.id ? "is-selected" : ""}`} onClick={() => selectFile(file)}>
-                  <span class="document-icon">MD</span>
-                  <span class="document-copy">
-                    <strong>{file.name}</strong>
-                    <small>{file.description || (file.local ? "本机草稿" : "云端文档")}</small>
-                  </span>
-                  <Show when={selectedId() === file.id}><span class="selected-mark">●</span></Show>
-                </button>
+                <Show when={renamingId() === file.id} fallback={
+                  <button class={`document-row ${selectedId() === file.id ? "is-selected" : ""}`} onClick={() => selectFile(file)}>
+                    <span class="document-glyph" aria-hidden="true">¶</span>
+                    <span class="document-copy">
+                      <strong>{file.name}</strong>
+                      <small>{file.local ? "本机草稿" : "云端文档"}</small>
+                    </span>
+                    <Show when={selectedId() === file.id}><span class="selected-mark" aria-hidden="true">•</span></Show>
+                  </button>
+                }>
+                  <form class="document-rename" onSubmit={commitRename}>
+                    <input
+                      ref={renameInput}
+                      value={renameValue()}
+                      aria-label="文档名称"
+                      onInput={(event) => setRenameValue(event.currentTarget.value)}
+                      onKeyDown={(event) => { if (event.key === "Escape") cancelRename(); }}
+                    />
+                    <button type="submit" aria-label="保存名称">保存</button>
+                    <button type="button" aria-label="取消重命名" onClick={cancelRename}>取消</button>
+                  </form>
+                </Show>
               )}</For>
             </div>
           </Show>
@@ -504,15 +544,8 @@ export default function WorkspaceSidebar(props: Props) {
       </div>
 
       <div class="sidebar-footer">
-        <div class="autosave-indicator"><i /> {selectedFile()?.local || mode() === "local" ? "本机草稿自动保存" : "云端文档手动保存"}</div>
-        <Show when={savedAt()}><small>已保存 · {new Date(savedAt()!).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</small></Show>
-        <Show when={sessionUser() && selectedFile()?.local}>
-          <button class="sidebar-share" onClick={syncCurrentToCloud}>同步此草稿到云端</button>
-        </Show>
-        <button class="sidebar-share" onClick={shareCurrent}>分享当前文档</button>
-        <Show when={sessionUser()} fallback={<p>无需登录也可创建、编辑和导出本机草稿。</p>}>
-          <button class="sidebar-image-upload" onClick={uploadImg}>上传图片到文档</button>
-        </Show>
+        <span>{selectedFile()?.local || mode() === "local" ? "本机草稿会自动保存" : "云端文档需手动保存"}</span>
+        <Show when={savedAt()}><small>最近保存 {new Date(savedAt()!).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</small></Show>
       </div>
     </aside>
   );

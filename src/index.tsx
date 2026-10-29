@@ -6,6 +6,7 @@ import "./index.css";
 import "@muyajs/core/lib/core.css";
 import AppHeader from "./components/app-header";
 import { Modal } from "./components/modal";
+import { ToastHost } from "./components/notify";
 
 const EditorPage = lazy(() => import("./pages/editor"));
 const Article = lazy(() => import("./pages/article"));
@@ -24,6 +25,7 @@ render(
   () => (
     <Router>
       <Modal />
+      <ToastHost />
       <div class="app-frame">
         <AppHeader />
         <main class="app-route-view">

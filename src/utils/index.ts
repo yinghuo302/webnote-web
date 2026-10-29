@@ -5,6 +5,7 @@ type MyEvent = {
   Login: void;
   Logout: void;
   EditorChanged: void;
+  Toast: { id: number; type: "info" | "warning" | "danger" | "success"; content: string };
   Modal: ModalState;
 }
 

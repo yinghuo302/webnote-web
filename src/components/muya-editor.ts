@@ -6,23 +6,15 @@ import {
 } from "@muyajs/core";
 import { bus } from "../utils";
 
-type MermaidRenderer = {
-  initialize(options: Record<string, unknown>): void;
-  parse(code: string): Promise<unknown>;
-  render(id: string, code: string, container?: HTMLElement): Promise<{
-    svg: string;
-    bindFunctions?: (element: HTMLElement) => void;
-  }>;
-};
+type MermaidRenderer = typeof import("mermaid").default;
 let mermaidRendererPromise: Promise<MermaidRenderer> | null = null;
 let mermaidRenderId = 0;
 const mermaidPreviewVersions = new WeakMap<HTMLElement, number>();
 
-// Reuse Muya's own bundled renderer module so preview and core diagram blocks share one Mermaid runtime.
+// Use Mermaid's public render API, matching the current MarkText diagram renderer.
 function getMermaidRenderer() {
   if (!mermaidRendererPromise) {
-    mermaidRendererPromise = import("@muyajs/core/lib/mermaid.core-ClIT2jZ-.mjs")
-      .then(({ default: mermaid }) => mermaid as MermaidRenderer);
+    mermaidRendererPromise = import("mermaid").then(({ default: mermaid }) => mermaid);
   }
   return mermaidRendererPromise;
 }

@@ -15,17 +15,18 @@
 
 - 在实例化和 `init()` 前注册 UI 插件；保留 `autoPairMarkdownSyntax: false`。
 - Muya 样式从 `@muyajs/core/lib/core.css` 由应用入口全局载入；Muya host 使用 `.mu-container` 类。
-- Mermaid 围栏由 Muya 导入为原生 diagram block。adapter 将普通代码块语言切换为 `mermaid` 后原位转换，并把光标移入源码。`diagram-preview.update()` 使用 MarkText 当前采用的 `mermaid.render(id, code, target)` 路径，生成唯一 render ID 并丢弃旧渲染结果；复用 Muya 自身的 Mermaid chunk。转换等待异步 paste handler 完成，避免改写粘贴事务中的光标。
-- 为 Muya 0.2.0 的 Selection `_select` / `_setFocus` 添加合法 DOM Range offset clamp，对应 MarkText 新版 `getLegalOffset` 修复，防止粘贴后的 stale offset 触发 `IndexSizeError`。
-- 游客启动时不请求 `/api/private/user`；仅登录标记存在或登录事件发生后才检查会话，避免开发前端单独启动时无意义请求未运行的后端。此轮只修改前端，没有改 Go API。
-- `IEditor` adapter 继续提供 `setValue()`、`getMd()`、`getOutline()`、`getRoot()`，供文件侧栏和大纲使用。
+- Mermaid 围栏由 Muya 导入为原生 diagram block。adapter 将普通代码块语言切换为 `mermaid` 后原位转换，并把光标移入源码。预览使用本地 MarkText `packages/muya/src/utils/diagram/render.ts` 的 Mermaid 12.2 `render(id, code, target)` 路径，给每次 render 唯一 ID 并忽略过期结果。Muya 0.2.0 的 Mermaid 11 仍用于其它内建导出路径。
+- 自动 Mermaid 转换等待异步 paste handler 完成；Selection `_select`/`_setFocus` 使用合法 DOM Range offset clamp，对应 MarkText 的 `getLegalOffset` 修复。
+- 游客启动不探测 `/api/private/user`，只有本地认证标记或登录成功后才验证会话。本轮仅修改前端，不改 Go API。
+- 登录、用户中心、社区和文档侧栏采用统一的纸张白、细边框、墨绿/暖灰视觉；文件操作使用同一命令组，重命名改为行内编辑，反馈改为非阻塞 toast。
+- `IEditor` adapter 提供 `setValue()`、`getMd()`、`getOutline()`、`getRoot()`，供侧栏与大纲使用。
 
 ## 本轮修改的验证状态
 
-- TypeScript 工具链已更新到 5.9.3；本轮 `node_modules/.bin/tsc.cmd --noEmit`：通过。
-- `npm run build`：通过；复用 Muya Mermaid core chunk，未再额外打包第二份 Mermaid runtime。Vite 仍提示其他 >500 KB 大 chunk。
+- TypeScript 5.9.3；`node_modules/.bin/tsc.cmd --noEmit`：通过。
+- 当前 UI 改造的 `npm run build`：通过；仍有体积较大的按需 chunk 警告。Muya 11 的文章导出 renderer 和 Mermaid 12.2 编辑预览 renderer 可能分别进入构建产物。
 - `git diff --check`：通过。
-- 尚未在浏览器完成实际交互验收。请重点验证 Mermaid 围栏粘贴/载入、slash 图表块、代码语言切换、连续快速编辑时旧渲染是否被丢弃，以及复制粘贴后的光标是否正常；游客模式不应请求 `/api/private/user`。
+- 尚未在浏览器完成实际交互验收。请重点验证 Mermaid 围栏粘贴/载入、slash 图表块、代码语言切换、连续快速编辑时旧渲染是否被丢弃，以及粘贴后的光标是否正常；游客启动时不应请求 `/api/private/user`。
 
 ## Git 注意事项
 

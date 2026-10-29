@@ -17,11 +17,11 @@ function FileDrop(props: {
   }
 
   return (
-    <form class="flex w-full items-center justify-center" onDragEnter={prevent} onDragOver={prevent} onDrop={onDrop}>
-      <label class="flex min-h-44 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-6 text-center hover:bg-indigo-50">
-        <span class="mb-2 text-2xl text-indigo-400">↑</span>
-        <span class="text-sm font-semibold text-slate-700">{props.tips}</span>
-        <span class="mt-1 text-xs text-slate-400">点击选择，或拖放到这里</span>
+    <form class="image-upload-form" onDragEnter={prevent} onDragOver={prevent} onDrop={onDrop}>
+      <label class="image-drop-target">
+        <span class="image-drop-mark">↑</span>
+        <span class="image-drop-title">{props.tips}</span>
+        <span class="image-drop-hint">点击选择，或拖放到这里</span>
         <input
           class="hidden"
           type="file"

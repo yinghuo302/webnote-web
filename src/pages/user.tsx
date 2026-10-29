@@ -1,5 +1,5 @@
 import { Show } from "solid-js";
-import { refreshSession, sessionUser } from "../utils/session";
+import { sessionUser, refreshSession } from "../utils/session";
 import { ajax, bus } from "../utils";
 import notify from "../components/notify";
 import Login from "../components/login";
@@ -7,7 +7,7 @@ import Login from "../components/login";
 export default function User() {
   let nicknameInput: HTMLInputElement | undefined;
   let passwordInput: HTMLInputElement | undefined;
-  let descriptionInput: HTMLInputElement | undefined;
+  let descriptionInput: HTMLTextAreaElement | undefined;
   let avatarInput: HTMLInputElement | undefined;
 
   function requireLogin() {
@@ -60,31 +60,50 @@ export default function User() {
 
   return (
     <section class="user-page">
+      <header class="page-heading">
+        <div>
+          <p class="page-kicker">账户资料</p>
+          <h1>用户中心</h1>
+          <p class="page-description">管理账户资料，写作与本机草稿不受登录状态影响。</p>
+        </div>
+      </header>
       <Show when={sessionUser()} fallback={
         <div class="user-login-notice">
-          <span class="sidebar-eyebrow">ACCOUNT</span>
-          <h1>用户中心</h1>
-          <p>登录后可管理头像、昵称和个人介绍。未登录时仍可使用写作空间及本地草稿。</p>
-          <button class="user-submit" onClick={requireLogin}>登录 / 注册</button>
+          <div class="notice-mark">W</div>
+          <h2>登录后管理账户资料</h2>
+          <p>现在也可以继续使用本地文档和大纲。</p>
+          <button class="form-submit" type="button" onClick={requireLogin}>登录 / 注册</button>
         </div>
       }>
         {(user) => (
-          <form class="user-page-card" onSubmit={modify}>
-            <h1>用户中心</h1>
-            <img class="user-avatar" src={user().avatar} alt="用户头像" />
-            <label for="avatar">更换头像</label>
-            <input ref={avatarInput} id="avatar" type="file" accept="image/*" onChange={uploadAvatar} />
+          <form class="user-profile" onSubmit={modify}>
+            <section class="profile-identity">
+              <img class="user-avatar" src={user().avatar} alt="用户头像" />
+              <div>
+                <strong>{user().nickname || "Webnote 用户"}</strong>
+                <span>账户资料</span>
+              </div>
+              <label class="avatar-change" for="avatar-file">更换头像</label>
+              <input ref={avatarInput} id="avatar-file" class="visually-hidden" type="file" accept="image/*" onChange={uploadAvatar} />
+            </section>
 
-            <label for="nickname">昵称</label>
-            <input ref={nicknameInput} id="nickname" type="text" value={user().nickname || ""} />
-
-            <label for="description">个人介绍</label>
-            <input ref={descriptionInput} id="description" type="text" value={user().description || ""} />
-
-            <label for="password">新密码（留空则不修改）</label>
-            <input ref={passwordInput} id="password" type="password" autocomplete="new-password" />
-
-            <button class="user-submit" type="submit">保存资料</button>
+            <div class="profile-divider" />
+            <label class="form-field">
+              <span>昵称</span>
+              <input ref={nicknameInput} type="text" value={user().nickname || ""} placeholder="你的显示名称" />
+            </label>
+            <label class="form-field">
+              <span>个人介绍</span>
+              <textarea ref={descriptionInput} rows="4" placeholder="写几句话介绍自己">{user().description || ""}</textarea>
+            </label>
+            <label class="form-field">
+              <span>新密码</span>
+              <input ref={passwordInput} type="password" autocomplete="new-password" placeholder="留空表示不修改" />
+            </label>
+            <div class="profile-actions">
+              <span>资料仅用于你的 Webnote 账户。</span>
+              <button class="form-submit" type="submit">保存更改</button>
+            </div>
           </form>
         )}
       </Show>

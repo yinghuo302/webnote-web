@@ -1,18 +1,19 @@
-import { A } from "@solidjs/router"
-import {  For } from "solid-js"
+import { A } from "@solidjs/router";
+import { For } from "solid-js";
 
-export const ArticleInfo = (props:{items:IArticle[]}) => {
-	return (
-		<main class="m-auto flex flex-col justify-center items-center w-full">
-			<For each={props.items}>
-				{(item) => <div class="text-lg w-2/3">
-					<div>
-						<h2 class="mt-5 text-2xl leading-loose text-blue-900 "><A href={"/article/" + item.fileId}>{item.name}</A></h2>
-						<p>{item.description}</p>
-					</div>
-					<hr class="my-4 border-0 border-t border-solid border-slate-100"></hr>
-				</div>}
-			</For>
-		</main>
-	)
-}
+export const ArticleInfo = (props: { items: IArticle[] }) => (
+  <div class="community-article-list">
+    <For each={props.items}>
+      {(item) => (
+        <article class="community-article">
+          <A class="community-article-title" href={`/article/${item.fileId}`}>{item.name}</A>
+          <p>{item.description || "暂无简介"}</p>
+          <div class="community-article-byline">
+            <span>{item.user?.nickname || "Webnote 作者"}</span>
+            <span>公开文章</span>
+          </div>
+        </article>
+      )}
+    </For>
+  </div>
+);
