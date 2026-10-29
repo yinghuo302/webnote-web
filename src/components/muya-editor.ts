@@ -250,8 +250,10 @@ export class MuyaEditor implements IEditor {
     if (mode === "source") this.sourceArea.value = this.instance.getMarkdown() || "";
     else this.instance.setContent(this.sourceArea.value);
     this.mode = mode;
-    this.root_ele.hidden = mode === "source";
-    this.sourceArea.hidden = mode !== "source";
+    this.root_ele.style.setProperty("display", mode === "source" ? "none" : "", "important");
+    this.sourceArea.style.display = mode === "source" ? "block" : "none";
+    this.root_ele.parentElement?.classList.toggle("is-source-mode", mode === "source");
+    document.body.classList.toggle("webnote-source-mode", mode === "source");
     if (mode === "source") this.sourceArea.focus();
     else this.instance.focus();
     bus.emit("EditorChanged");
@@ -271,15 +273,27 @@ export class MuyaEditor implements IEditor {
       }
       return;
     }
-    const headings = this.root_ele.querySelectorAll("h1,h2,h3,h4,h5,h6");
-    headings[index]?.scrollIntoView({ behavior: "smooth", block: "center" });
-    (headings[index] as HTMLElement | undefined)?.click();
-    this.instance.focus();
+    const headings = this.root_ele.querySelectorAll<HTMLElement>(".mu-atx-heading, .mu-setext-heading, h1, h2, h3, h4, h5, h6");
+    const heading = headings[index];
+    if (!heading) return;
+    heading.scrollIntoView({ behavior: "auto", block: "center" });
+    requestAnimationFrame(() => {
+      const rect = heading.getBoundingClientRect();
+      const x = Math.min(rect.right - 4, Math.max(rect.left + 4, rect.left + 32));
+      const y = rect.top + Math.min(rect.height / 2, 20);
+      heading.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, clientX: x, clientY: y, buttons: 1 }));
+      heading.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, clientX: x, clientY: y }));
+      heading.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: x, clientY: y }));
+      this.instance.focus();
+    });
   }
   destroy() {
     this.destroyed = true;
     this.instance?.off("json-change", this.onJsonChange);
     this.instance?.destroy();
+    this.root_ele.parentElement?.classList.remove("is-source-mode");
+    document.body.classList.remove("webnote-source-mode");
+    this.root_ele.style.removeProperty("display");
     this.sourceArea.remove();
   }
 }

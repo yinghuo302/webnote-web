@@ -16,7 +16,7 @@ type WorkspaceFile = {
   updatedAt?: number;
 };
 
-type Props = { editor?: IEditor };
+type Props = { editor?: IEditor; visible?: boolean };
 type PanelTab = "files" | "outline";
 const BLANK_MARKDOWN = "# 请输入标题";
 
@@ -463,11 +463,10 @@ export default function WorkspaceSidebar(props: Props) {
   });
 
   return (
-    <aside class="workspace-sidebar" aria-label="文件与大纲侧边栏">
+    <aside class="workspace-sidebar" aria-label="文件与大纲侧边栏" style={{ display: props.visible === false ? "none" : "" }}>
       <div class="sidebar-heading">
         <div>
           <h2>文档</h2>
-          <p>{mode() === "local" ? "保存在此浏览器" : "云端与本机文档"}</p>
         </div>
         <span class="sidebar-count">{files().length}</span>
       </div>
