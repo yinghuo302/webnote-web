@@ -9,7 +9,7 @@ import notify from "./notify";
 export default function AppHeader() {
   const onLogin = () => {
     bus.emit("Modal", { open: false, component: null });
-    void refreshSession();
+    void refreshSession(true);
   };
 
   onMount(() => {

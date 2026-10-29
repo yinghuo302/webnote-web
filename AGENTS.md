@@ -20,7 +20,8 @@
 - Register Muya UI plugins with `Muya.use(...)` before creating the editor and before `init()`. Keep inline formatting, code language selection, quick insert, preview tools, table controls, images, and links enabled.
 - Keep `autoPairMarkdownSyntax: false`; this prevents unwanted auto-pairing of Markdown markers such as `*` and `~`.
 - `@muyajs/core/lib/core.css` is loaded by the application entry so editor and rendered article views share the MarkText/Muya stylesheet. The host editor must have the `.mu-container` class. Muya floating controls are portaled to `document.body`; style conservatively and do not override their internal controls broadly.
-- Mermaid fences imported from Markdown become native diagram blocks. The adapter also converts the active code block when its language becomes `mermaid`; native diagram preview updates as the source is edited. Keep `PreviewToolBar` registered.
+- Mermaid fences imported from Markdown become native diagram blocks. The adapter converts the active code block when its language becomes `mermaid`; its `diagram-preview` override uses the same Mermaid render chunk as Muya, with unique render IDs and stale-result suppression. Conversion is deferred until clipboard paste settles. Keep `PreviewToolBar` registered.
+- Muya 0.2.0 currently exposes its Mermaid runtime only as a hashed `lib/mermaid.core-*.mjs` chunk. The adapter import is intentionally tied to the pinned exact Muya package version; update the chunk path and verify that the build still emits only one Mermaid runtime when upgrading Muya.
 - The adapter exposes `setValue()`, `getMd()`, `getOutline()`, and `getRoot()`. Keep file load/save/import/export flows routed through this interface.
 
 ## Validation
@@ -33,7 +34,7 @@ npm run build
 ```
 
 - A browser check should cover guest local draft CRUD and persistence, remote files after login, Community/User top navigation, outline navigation, Mermaid imported/new/converted rendering, and Muya floating menus.
-- Type declarations in `node_modules/@types` may be newer than the pinned TypeScript 4.9 parser. Record this as an environment/dependency compatibility issue rather than working around it by restoring the removed submodule.
+- TypeScript is pinned at 5.9.3 because Mermaid's current declaration tree uses TypeScript 5 syntax; do not downgrade it to 4.9 without resolving that compatibility issue.
 
 ## Git safety
 

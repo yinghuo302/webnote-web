@@ -1,21 +1,115 @@
 import {
-  Muya, en, zh, MarkdownToHtml, InlineFormatToolbar, CodeBlockLanguageSelector,
+  Muya, en, zh, InlineFormatToolbar, CodeBlockLanguageSelector,
   ImageResizeBar, ImageToolBar, LinkTools, ParagraphFrontButton,
   ParagraphFrontMenu, ParagraphQuickInsertMenu, PreviewToolBar,
   TableColumnToolbar, TableDragBar, TableRowColumMenu,
 } from "@muyajs/core";
 import { bus } from "../utils";
 
-let mermaidWarmed = false;
+type MermaidRenderer = {
+  initialize(options: Record<string, unknown>): void;
+  parse(code: string): Promise<unknown>;
+  render(id: string, code: string, container?: HTMLElement): Promise<{
+    svg: string;
+    bindFunctions?: (element: HTMLElement) => void;
+  }>;
+};
+let mermaidRendererPromise: Promise<MermaidRenderer> | null = null;
+let mermaidRenderId = 0;
+const mermaidPreviewVersions = new WeakMap<HTMLElement, number>();
+
+// Reuse Muya's own bundled renderer module so preview and core diagram blocks share one Mermaid runtime.
+function getMermaidRenderer() {
+  if (!mermaidRendererPromise) {
+    mermaidRendererPromise = import("@muyajs/core/lib/mermaid.core-ClIT2jZ-.mjs")
+      .then(({ default: mermaid }) => mermaid as MermaidRenderer);
+  }
+  return mermaidRendererPromise;
+}
+
 function warmMermaid() {
-  if (mermaidWarmed) return;
-  mermaidWarmed = true;
-  // MarkdownToHtml shares Muya's internal lazy renderer cache with diagram
-  // blocks, so this exercises the exact Mermaid renderer used by previews.
-  const example = "```mermaid\nflowchart TD\n  Start --> Done\n```";
-  void new MarkdownToHtml(example).renderHtml().catch(() => {
-    mermaidWarmed = false;
+  void getMermaidRenderer()
+    .then((mermaid) => {
+      mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default" });
+      return mermaid.parse("flowchart TD\n  Start --> Done");
+    })
+    .catch(() => {
+      mermaidRendererPromise = null;
+    });
+}
+
+function renderMermaidPreview(preview: any, code: string) {
+  const target = preview.domNode as HTMLElement;
+  const version = (mermaidPreviewVersions.get(target) || 0) + 1;
+  mermaidPreviewVersions.set(target, version);
+  preview.code = code;
+  if (!code) {
+    target.textContent = "< Empty Diagram >";
+    return Promise.resolve();
+  }
+
+  target.textContent = "Loading...";
+  const theme = preview.muya.options.mermaidTheme || "default";
+  return getMermaidRenderer().then(async (mermaid) => {
+    mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme });
+    await mermaid.parse(code);
+    const { svg, bindFunctions } = await mermaid.render(`webnote-mermaid-${++mermaidRenderId}`, code, target);
+    if (mermaidPreviewVersions.get(target) !== version) return;
+    target.innerHTML = svg;
+    bindFunctions?.(target);
+  }).catch((error: unknown) => {
+    if (mermaidPreviewVersions.get(target) !== version) return;
+    const message = error instanceof Error ? error.message : String(error);
+    const errorElement = document.createElement("div");
+    errorElement.className = "mu-diagram-error";
+    errorElement.textContent = `< Invalid Diagram Code > ${message}`;
+    target.replaceChildren(errorElement);
   });
+}
+
+function installLiveMermaidPreview(muya: Muya) {
+  const scrollPage = muya.editor.scrollPage as any;
+  const previewClass = scrollPage?.constructor?.loadBlock("diagram-preview");
+  const prototype = previewClass?.prototype;
+  if (!prototype || prototype.__webnoteLiveMermaid) return;
+
+  const originalUpdate = prototype.update;
+  prototype.update = function (code = this.code) {
+    if (this.type !== "mermaid") return originalUpdate.call(this, code);
+    return renderMermaidPreview(this, code);
+  };
+  prototype.__webnoteLiveMermaid = true;
+}
+
+function legalRangeOffset(node: Node, offset: number) {
+  if (!Number.isFinite(offset) || offset < 0) return 0;
+  const max = node.nodeType === Node.TEXT_NODE ? (node as Text).length : node.childNodes.length;
+  return Math.min(offset, max);
+}
+
+// Muya 0.2.0 predates MarkText's legal-offset clamp for stale DOM selections.
+function installRangeOffsetGuard(muya: Muya) {
+  const selection = muya.editor.selection as any;
+  if (!selection || selection.__webnoteRangeOffsetGuard) return;
+  const nativeSelect = selection._select;
+  if (typeof nativeSelect === "function") {
+    selection._select = function (startNode: Node, startOffset: number, endNode?: Node, endOffset?: number) {
+      return nativeSelect.call(
+        this,
+        startNode,
+        legalRangeOffset(startNode, startOffset),
+        endNode,
+        endNode && typeof endOffset === "number" ? legalRangeOffset(endNode, endOffset) : endOffset,
+      );
+    };
+  }
+  const nativeSetFocus = selection._setFocus;
+  if (typeof nativeSetFocus === "function") {
+    selection._setFocus = function (focusNode: Node, focusOffset: number) {
+      return nativeSetFocus.call(this, focusNode, legalRangeOffset(focusNode, focusOffset));
+    };
+  }
+  selection.__webnoteRangeOffsetGuard = true;
 }
 
 function registerPlugins() {
@@ -42,17 +136,57 @@ export class MuyaEditor implements IEditor {
   private root_ele: HTMLDivElement;
   private instance: Muya;
   private mermaidConversionQueued = false;
+  private mermaidConversionPending = false;
+  private pasteInProgress = 0;
   private destroyed = false;
 
   private readonly onJsonChange = () => {
     bus.emit("EditorChanged");
-    if (this.mermaidConversionQueued) return;
+    this.mermaidConversionPending = true;
+    this.scheduleMermaidConversion();
+  };
+
+  private scheduleMermaidConversion() {
+    if (this.destroyed) return;
+    if (this.pasteInProgress > 0) {
+      this.mermaidConversionPending = true;
+      return;
+    }
+    if (this.mermaidConversionQueued || !this.mermaidConversionPending) return;
+
     this.mermaidConversionQueued = true;
     Promise.resolve().then(() => {
       this.mermaidConversionQueued = false;
-      if (!this.destroyed) this.convertActiveMermaidCodeBlock();
+      if (this.destroyed) return;
+      if (this.pasteInProgress > 0) return;
+      this.mermaidConversionPending = false;
+      this.convertActiveMermaidCodeBlock();
     });
-  };
+  }
+
+  private wrapPasteHandler() {
+    const clipboard = this.instance.editor.clipboard as any;
+    if (!clipboard || clipboard.__webnotePasteGuard) return;
+    const pasteHandler = clipboard.pasteHandler;
+    if (typeof pasteHandler !== "function") return;
+
+    clipboard.pasteHandler = (...args: any[]) => {
+      this.pasteInProgress += 1;
+      let result: Promise<unknown>;
+      try {
+        result = Promise.resolve(pasteHandler.apply(clipboard, args));
+      } catch (error) {
+        this.pasteInProgress = Math.max(0, this.pasteInProgress - 1);
+        this.scheduleMermaidConversion();
+        throw error;
+      }
+      return result.finally(() => {
+        this.pasteInProgress = Math.max(0, this.pasteInProgress - 1);
+        this.scheduleMermaidConversion();
+      });
+    };
+    clipboard.__webnotePasteGuard = true;
+  }
 
   private convertActiveMermaidCodeBlock() {
     const selection = this.instance.editor.selection.getSelection();
@@ -78,7 +212,7 @@ export class MuyaEditor implements IEditor {
     this.root_ele = root;
     registerPlugins();
     this.instance = new Muya(root, {
-      markdown: initial,
+      markdown: "",
       autoPairMarkdownSyntax: false,
       math: true,
       locale: zh || en,
@@ -86,9 +220,13 @@ export class MuyaEditor implements IEditor {
       lineHeight: 1.85,
       codeBlockLineNumbers: true,
     });
+    installRangeOffsetGuard(this.instance);
+    this.wrapPasteHandler();
     this.instance.init();
+    installLiveMermaidPreview(this.instance);
     this.instance.on("json-change", this.onJsonChange);
     warmMermaid();
+    this.instance.setContent(initial || "");
   }
 
   setValue(markdown: string) { this.instance?.setContent(markdown || ""); }

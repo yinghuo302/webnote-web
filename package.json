@@ -13,12 +13,12 @@
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.23",
     "tailwindcss": "^3.3.2",
-    "typescript": "^4.9.5",
+    "typescript": "^5.9.3",
     "vite": "^4.1.1",
     "vite-plugin-solid": "^2.5.0"
   },
   "dependencies": {
-    "@muyajs/core": "^0.2.0",
+    "@muyajs/core": "0.2.0",
     "@solidjs/router": "^0.8.2",
     "@types/highlightjs": "^10.1.0",
     "@types/katex": "^0.16.0",
