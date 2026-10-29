@@ -127,6 +127,8 @@ function registerPlugins() {
 export class MuyaEditor implements IEditor {
   private root_ele: HTMLDivElement;
   private instance: Muya;
+  private sourceArea: HTMLTextAreaElement;
+  private mode: "visual" | "source" = "visual";
   private mermaidConversionQueued = false;
   private mermaidConversionPending = false;
   private pasteInProgress = 0;
@@ -202,6 +204,13 @@ export class MuyaEditor implements IEditor {
 
   constructor(root: HTMLDivElement, initial = "# 请输入标题") {
     this.root_ele = root;
+    this.sourceArea = document.createElement("textarea");
+    this.sourceArea.className = "markdown-source-editor";
+    this.sourceArea.setAttribute("aria-label", "Markdown 源码编辑器");
+    this.sourceArea.spellcheck = false;
+    this.sourceArea.hidden = true;
+    root.insertAdjacentElement("afterend", this.sourceArea);
+    this.sourceArea.addEventListener("input", () => bus.emit("EditorChanged"));
     registerPlugins();
     this.instance = new Muya(root, {
       markdown: "",
@@ -221,16 +230,57 @@ export class MuyaEditor implements IEditor {
     this.instance.setContent(initial || "");
   }
 
-  setValue(markdown: string) { this.instance?.setContent(markdown || ""); }
-  getMd() { return this.instance?.getMarkdown() || ""; }
+  setValue(markdown: string) {
+    const value = markdown || "";
+    this.sourceArea.value = value;
+    this.instance?.setContent(value);
+  }
+  getMd() { return this.mode === "source" ? this.sourceArea.value : (this.instance?.getMarkdown() || ""); }
   getOutline(): IOutLine[] {
-    return (this.instance?.getTOC() || []).map((item) => ({ level: item.lvl, title: item.content }));
+    if (this.mode === "visual") return (this.instance?.getTOC() || []).map((item) => ({ level: item.lvl, title: item.content }));
+    return this.sourceArea.value.split(/\r?\n/).flatMap((line) => {
+      const match = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(line);
+      return match ? [{ level: match[1].length, title: match[2] }] : [];
+    });
   }
   getRoot() { return (this.instance?.domNode as HTMLDivElement) || this.root_ele; }
+  getMode() { return this.mode; }
+  setMode(mode: "visual" | "source") {
+    if (mode === this.mode) return;
+    if (mode === "source") this.sourceArea.value = this.instance.getMarkdown() || "";
+    else this.instance.setContent(this.sourceArea.value);
+    this.mode = mode;
+    this.root_ele.hidden = mode === "source";
+    this.sourceArea.hidden = mode !== "source";
+    if (mode === "source") this.sourceArea.focus();
+    else this.instance.focus();
+    bus.emit("EditorChanged");
+  }
+  jumpToHeading(index: number) {
+    if (this.mode === "source") {
+      const lines = this.sourceArea.value.split(/\r?\n/);
+      let headingIndex = -1;
+      let offset = 0;
+      for (const line of lines) {
+        if (/^#{1,6}\s+/.test(line) && ++headingIndex === index) {
+          this.sourceArea.focus();
+          this.sourceArea.setSelectionRange(offset, offset + line.length);
+          return;
+        }
+        offset += line.length + 1;
+      }
+      return;
+    }
+    const headings = this.root_ele.querySelectorAll("h1,h2,h3,h4,h5,h6");
+    headings[index]?.scrollIntoView({ behavior: "smooth", block: "center" });
+    (headings[index] as HTMLElement | undefined)?.click();
+    this.instance.focus();
+  }
   destroy() {
     this.destroyed = true;
     this.instance?.off("json-change", this.onJsonChange);
     this.instance?.destroy();
+    this.sourceArea.remove();
   }
 }
 

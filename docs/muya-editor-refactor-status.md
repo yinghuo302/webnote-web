@@ -19,7 +19,9 @@
 - 自动 Mermaid 转换等待异步 paste handler 完成；Selection `_select`/`_setFocus` 使用合法 DOM Range offset clamp，对应 MarkText 的 `getLegalOffset` 修复。
 - 游客启动不探测 `/api/private/user`，只有本地认证标记或登录成功后才验证会话。本轮仅修改前端，不改 Go API。
 - 登录、用户中心、社区和文档侧栏采用统一的纸张白、细边框、墨绿/暖灰视觉；文件操作使用同一命令组，重命名改为行内编辑，反馈改为非阻塞 toast。
-- `IEditor` adapter 提供 `setValue()`、`getMd()`、`getOutline()`、`getRoot()`，供侧栏与大纲使用。
+- `IEditor` adapter 提供 `setValue()`、`getMd()`、`getOutline()`、`getRoot()`；同时支持侧栏切换源码 (`textarea`) / Muya 即时渲染模式。源码编辑的 Markdown 在切回即时渲染时整体载入 Muya；保存/导出直接读取当前模式内容。
+- 大纲通过稳定的标题顺序索引定位：即时渲染模式滚动并聚焦对应标题，源码模式选中对应 Markdown 标题行。源码模式当前识别 ATX 标题（`#` 至 `######`）。
+- 粘贴兼容性检查：仍由 Muya clipboard 负责 `text/html` 与 `text/plain` 的解析/复制；adapter 仅等待异步 paste handler 完成后再进行 Mermaid 块转换，并对 stale DOM selection 做合法 Range offset clamp。未用全局事件劫持浏览器剪贴板，也未更改后端/API。需在真实浏览器覆盖纯文本、富文本、Markdown/Mermaid 围栏及图片粘贴；此环境尚未执行浏览器交互验收。
 
 ## 本轮修改的验证状态
 

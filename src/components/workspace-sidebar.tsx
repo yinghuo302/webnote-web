@@ -48,6 +48,7 @@ export default function WorkspaceSidebar(props: Props) {
   const [renameValue, setRenameValue] = createSignal("");
   const [savedAt, setSavedAt] = createSignal<number | null>(null);
   const [outline, setOutline] = createSignal<IOutLine[]>([]);
+  const [editorMode, setEditorMode] = createSignal<"visual" | "source">("visual");
   let importInput: HTMLInputElement | undefined;
   let renameInput: HTMLInputElement | undefined;
   let autosaveTimer: number | undefined;
@@ -433,15 +434,15 @@ export default function WorkspaceSidebar(props: Props) {
 
   function refreshOutline() {
     setOutline(props.editor?.getOutline() || []);
+    if (props.editor) setEditorMode(props.editor.getMode());
   }
 
-  function jumpToHeading(title: string, level: number) {
-    const root = document.querySelector(".mu-editor");
-    if (!root) return;
-    const heading = Array.from(root.querySelectorAll(`h${level}`))
-      .find((node) => node.textContent?.trim() === title);
-    heading?.scrollIntoView({ behavior: "smooth", block: "center" });
-    props.editor?.getRoot()?.focus();
+  function toggleEditorMode() {
+    if (!props.editor) return;
+    const next = editorMode() === "source" ? "visual" : "source";
+    props.editor.setMode(next);
+    setEditorMode(next);
+    refreshOutline();
   }
 
   const onLogout = () => preserveRemoteDraftOnLogout();
@@ -480,6 +481,7 @@ export default function WorkspaceSidebar(props: Props) {
           { label: "重命名", mark: "✎", run: renameCurrent },
           { label: "删除", mark: "−", run: deleteCurrent },
           { label: "分享", mark: "↗", run: shareCurrent },
+          { label: editorMode() === "source" ? "即时渲染" : "源码模式", mark: "‹›", run: toggleEditorMode },
           ...(sessionUser() ? [{ label: "图片", mark: "▧", run: uploadImg }] : []),
           ...(sessionUser() && selectedFile()?.local ? [{ label: "同步", mark: "⇧", run: syncCurrentToCloud }] : []),
         ]}>{(action) => (
@@ -504,8 +506,8 @@ export default function WorkspaceSidebar(props: Props) {
         <Show when={tab() === "files"} fallback={
           <Show when={outline().length} fallback={<div class="sidebar-empty"><b>暂无大纲</b><span>添加标题后会显示在这里</span></div>}>
             <div class="outline-list">
-              <For each={outline()}>{(item) => (
-                <button class={`outline-item outline-level-${item.level}`} onClick={() => jumpToHeading(item.title, item.level)} title={item.title}>
+              <For each={outline()}>{(item, index) => (
+                <button class={`outline-item outline-level-${item.level}`} onClick={() => props.editor?.jumpToHeading(index())} title={item.title}>
                   <span class="outline-dot" />{item.title}
                 </button>
               )}</For>

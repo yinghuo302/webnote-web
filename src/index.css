@@ -98,6 +98,8 @@ button { cursor: pointer; }
 .editor-paper { position:relative; max-width:980px; min-height:100%; margin:0 auto; padding:38px 64px 72px; border:1px solid #e1dfd7; border-radius:3px; background:var(--paper); box-shadow:0 4px 18px #39382f0a; }
 .editor-paper .mu-container { max-width:none; min-height:520px; margin:0; padding:0 0 55px; font-family:Inter,"Noto Sans SC",ui-sans-serif,system-ui,sans-serif; }
 .editor-paper .mu-editor { outline:none; }
+.editor-paper .markdown-source-editor { display:block; width:100%; min-height:520px; resize:vertical; padding:0 0 55px; border:0; outline:0; color:#30352e; background:transparent; font:14px/1.85 ui-monospace,SFMono-Regular,Consolas,monospace; tab-size:2; white-space:pre; overflow-wrap:normal; }
+.editor-paper .markdown-source-editor[hidden] { display:none; }
 body .mu-float-wrapper { z-index:10000; font-family:Inter,"Noto Sans SC",ui-sans-serif,system-ui,sans-serif; }
 
 /* Community, profile and article pages */

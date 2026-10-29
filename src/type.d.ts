@@ -14,6 +14,9 @@ interface IEditor {
   getMd(): string;
   getOutline(): IOutLine[];
   getRoot(): HTMLDivElement;
+  getMode(): "visual" | "source";
+  setMode(mode: "visual" | "source"): void;
+  jumpToHeading(index: number): void;
 }
 
 interface IArticle{
