@@ -20,15 +20,16 @@
 - 游客启动不探测 `/api/private/user`，只有本地认证标记或登录成功后才验证会话。本轮仅修改前端，不改 Go API。
 - 登录、用户中心、社区和文档侧栏采用统一的纸张白、细边框、墨绿/暖灰视觉；文件操作使用同一命令组，重命名改为行内编辑，反馈改为非阻塞 toast。
 - `IEditor` adapter 提供 `setValue()`、`getMd()`、`getOutline()`、`getRoot()`；同时支持侧栏切换源码 (`textarea`) / Muya 即时渲染模式。源码编辑的 Markdown 在切回即时渲染时整体载入 Muya；保存/导出直接读取当前模式内容。
-- 大纲定位使用 `Muya.editor.scrollPage.children.iterator()` 取得与 `getTOC()` 相同顺序的顶层 heading blocks，调用 block 的 `firstContentInDescendant().setCursor()` 定位内部编辑光标；源码模式选中对应 Markdown 标题行。当前仍需浏览器实测确认。
-- 源码模式使用独立 shell、行号 gutter 和暖白/灰绿等宽文本区；切换时将 Muya host 移出 DOM 放入 DocumentFragment，确保即时渲染内容不可能叠在源码之下；回切时先复位 host 再载入源码。侧栏显隐按钮在侧栏标题栏；隐藏时在原侧栏边缘显示重新打开按钮。写作区 Markdown 信息 caption 已删除。
+- 大纲定位使用 `Muya.editor.scrollPage.children.iterator()` 取得与 `getTOC()` 相同顺序的顶层 heading blocks，调用 block 的 `firstContentInDescendant().setCursor()` 定位内部编辑光标；源码模式选中标题行并同步滚动 textarea 内部视口到对应行。当前仍需浏览器实测确认。
+- Muya 初始化显式设置 `trimUnnecessaryCodeBlockEmptyLines: false`，避免代码块解析时修剪首尾空行。CommonMark 普通段落间多余空行属于分隔符，不是可独立保留的内容；该项仅作用于代码块。
+- 源码模式使用独立 shell、行号 gutter 和暖白/灰绿等宽文本区；切换时将 Muya host 移出 DOM 放入 DocumentFragment，确保即时渲染内容不可能叠在源码之下；回切时先复位 host 再载入源码。侧栏显隐按钮在侧栏标题栏；隐藏时在原侧栏边缘显示重新打开按钮。写作区 Markdown 信息 caption 已删除，侧栏自动保存提示与最近保存时间状态栏已移除。
 - 粘贴兼容性检查：仍由 Muya clipboard 负责 `text/html` 与 `text/plain` 的解析/复制；adapter 仅等待异步 paste handler 完成后再进行 Mermaid 块转换，并对 stale DOM selection 做合法 Range offset clamp。未用全局事件劫持浏览器剪贴板，也未更改后端/API。需在真实浏览器覆盖纯文本、富文本、Markdown/Mermaid 围栏及图片粘贴；此环境尚未执行浏览器交互验收。
 
 ## 本轮修改的验证状态
 
-- TypeScript 5.9.3；`node_modules/.bin/tsc.cmd --noEmit`：通过。
-- 当前 UI 改造的 `npm run build`：通过；仍有体积较大的按需 chunk 警告。Muya 11 的文章导出 renderer 和 Mermaid 12.2 编辑预览 renderer 可能分别进入构建产物。
-- `git diff --check`：通过。
+- TypeScript 5.9.3；本轮 `npx tsc --noEmit`：通过。
+- 最近一次 `npm run build` 曾通过（前一轮），之后另一次尝试因 esbuild `spawn EPERM` 失败；本轮未重新运行构建。完整浏览器交互仍待验证。
+- 本轮 `git diff --check`：通过。
 - 尚未在浏览器完成实际交互验收。请重点验证 Mermaid 围栏粘贴/载入、slash 图表块、代码语言切换、连续快速编辑时旧渲染是否被丢弃，以及粘贴后的光标是否正常；游客启动时不应请求 `/api/private/user`。
 
 ## Git 注意事项

@@ -241,6 +241,7 @@ export class MuyaEditor implements IEditor {
     this.instance = new Muya(root, {
       markdown: "",
       autoPairMarkdownSyntax: false,
+      trimUnnecessaryCodeBlockEmptyLines: false,
       math: true,
       locale: zh || en,
       fontSize: 15,
@@ -302,13 +303,16 @@ export class MuyaEditor implements IEditor {
       const lines = this.sourceArea.value.split(/\r?\n/);
       let headingIndex = -1;
       let offset = 0;
-      for (const line of lines) {
+      for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
+        const line = lines[lineIndex];
         if (/^#{1,6}\s+/.test(line) && ++headingIndex === index) {
           this.sourceArea.focus();
           this.sourceArea.setSelectionRange(offset, offset + line.length);
+          const lineHeight = Number.parseFloat(getComputedStyle(this.sourceArea).lineHeight) || 23;
+          this.sourceArea.scrollTop = Math.max(0, lineIndex * lineHeight - lineHeight * 2);
           return;
         }
-        offset += line.length + 1;
+        offset += line.length + (lineIndex < lines.length - 1 && this.sourceArea.value.slice(offset + line.length, offset + line.length + 2) === "\r\n" ? 2 : 1);
       }
       return;
     }

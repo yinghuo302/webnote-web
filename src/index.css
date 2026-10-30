@@ -89,8 +89,6 @@ button { cursor: pointer; }
 .sidebar-empty { display:flex; flex-direction:column; gap:5px; padding:28px 12px; color:#898981; text-align:center; }
 .sidebar-empty b { color:#555a52; font-family:Georgia,"Noto Serif SC",serif; font-size:12px; font-weight:600; }
 .sidebar-empty span { font-size:10px; line-height:1.5; }
-.sidebar-footer { display:flex; flex-direction:column; gap:5px; padding:10px 4px 1px; border-top:1px solid var(--line); color:#85857d; font-size:9px; }
-.sidebar-footer small { color:#a19f97; font-size:9px; }
 .visually-hidden { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; clip-path:inset(50%); border:0; }
 
 /* Muya writing surface */
@@ -99,12 +97,12 @@ button { cursor: pointer; }
 .editor-paper { position:relative; max-width:980px; min-height:100%; margin:0 auto; padding:38px 64px 72px; border:1px solid #e1dfd7; border-radius:3px; background:var(--paper); box-shadow:0 4px 18px #39382f0a; }
 .editor-paper .mu-container { max-width:none; min-height:520px; margin:0; padding:0 0 55px; font-family:Inter,"Noto Sans SC",ui-sans-serif,system-ui,sans-serif; }
 .editor-paper .mu-editor { outline:none; }
-.editor-paper.is-source-mode { padding:0; border:1px solid #e1dfd7; background:#fffefa; box-shadow:0 4px 18px #39382f0a; }
+.editor-paper.is-source-mode { height:100%; min-height:100%; padding:0; border:1px solid #e1dfd7; background:#fffefa; box-shadow:0 4px 18px #39382f0a; }
 .editor-paper.is-source-mode > .mu-container { display:none !important; }
-.editor-paper .markdown-source-shell { display:grid; grid-template-columns:52px minmax(0,1fr); width:100%; min-height:100%; overflow:auto; border:0; border-radius:2px; color:#343832; background:#fffefa; font:13px/1.8 "Cascadia Code",Consolas,"Courier New",monospace; }
+.editor-paper .markdown-source-shell { display:grid; grid-template-columns:52px minmax(0,1fr); width:100%; height:100%; min-height:520px; overflow:hidden; border:0; border-radius:2px; color:#343832; background:#fffefa; font:13px/1.8 "Cascadia Code",Consolas,"Courier New",monospace; }
 .editor-paper .markdown-source-shell[hidden] { display:none !important; }
-.editor-paper .markdown-source-gutter { min-height:520px; padding:22px 12px 48px 0; overflow:hidden; border-right:1px solid #e9e7df; color:#aaa89f; background:#f7f6f1; text-align:right; white-space:pre; user-select:none; font:inherit; line-height:1.8; }
-.editor-paper .markdown-source-editor { display:block; width:100%; min-width:100%; min-height:520px; resize:none; padding:22px 24px 48px; border:0; outline:0; color:#343832; caret-color:#496351; background:#fffefa; font:inherit; line-height:1.8; tab-size:2; white-space:pre; overflow:auto; }
+.editor-paper .markdown-source-gutter { height:100%; min-height:0; padding:22px 12px 48px 0; overflow:hidden; border-right:1px solid #e9e7df; color:#aaa89f; background:#f7f6f1; text-align:right; white-space:pre; user-select:none; font:inherit; line-height:1.8; }
+.editor-paper .markdown-source-editor { display:block; width:100%; min-width:100%; height:100%; min-height:0; resize:none; padding:22px 24px 48px; border:0; outline:0; color:#343832; caret-color:#496351; background:#fffefa; font:inherit; line-height:1.8; tab-size:2; white-space:pre; overflow:auto; }
 .editor-paper .markdown-source-editor:focus { background:#fffefa; }
 .editor-paper .markdown-source-editor::selection { color:#292c29; background:#e2e8df; }
 body.webnote-source-mode .mu-float-wrapper { display:none !important; }

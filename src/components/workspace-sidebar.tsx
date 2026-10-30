@@ -46,7 +46,6 @@ export default function WorkspaceSidebar(props: Props) {
   const [pendingContent, setPendingContent] = createSignal<string | null>(null);
   const [renamingId, setRenamingId] = createSignal<string | null>(null);
   const [renameValue, setRenameValue] = createSignal("");
-  const [savedAt, setSavedAt] = createSignal<number | null>(null);
   const [outline, setOutline] = createSignal<IOutLine[]>([]);
   const [editorMode, setEditorMode] = createSignal<"visual" | "source">("visual");
   let importInput: HTMLInputElement | undefined;
@@ -226,7 +225,6 @@ export default function WorkspaceSidebar(props: Props) {
         ? items.map((item) => item.id === file.id ? updated : item)
         : [...items, updated]);
       setSelectedId(updated.id);
-      setSavedAt(Date.now());
       notify("success", "已保存到云端");
       return updated;
     } catch {
@@ -244,7 +242,6 @@ export default function WorkspaceSidebar(props: Props) {
       setFiles(next);
       setSelectedId(draft.id);
       persistLocal(next);
-      setSavedAt(Date.now());
       notify("success", "已保存到本机");
       return;
     }
@@ -253,7 +250,6 @@ export default function WorkspaceSidebar(props: Props) {
       const next = files().map((item) => item.id === file.id ? updated : item);
       setFiles(next);
       persistLocal(next);
-      setSavedAt(Date.now());
       notify("success", "已保存到本机");
     } else {
       await saveRemote(file, content);
@@ -428,7 +424,6 @@ export default function WorkspaceSidebar(props: Props) {
       const next = files().map((item) => item.id === current.id ? updated : item);
       setFiles(next);
       persistLocal(next);
-      setSavedAt(Date.now());
     }, 450);
   }
 
@@ -547,10 +542,6 @@ export default function WorkspaceSidebar(props: Props) {
         </Show>
       </div>
 
-      <div class="sidebar-footer">
-        <span>{selectedFile()?.local || mode() === "local" ? "本机草稿会自动保存" : "云端文档需手动保存"}</span>
-        <Show when={savedAt()}><small>最近保存 {new Date(savedAt()!).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</small></Show>
-      </div>
     </aside>
   );
 }
