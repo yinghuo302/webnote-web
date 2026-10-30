@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import Editor from "../components/editor";
 import WorkspaceSidebar from "../components/workspace-sidebar";
 
@@ -7,17 +7,11 @@ export default function EditorPage() {
   const [sidebarVisible, setSidebarVisible] = createSignal(true);
   return (
     <div class={`writer-workspace ${sidebarVisible() ? "" : "sidebar-collapsed"}`}>
-      <WorkspaceSidebar editor={editor()} visible={sidebarVisible()} />
+      <WorkspaceSidebar editor={editor()} visible={sidebarVisible()} onToggleVisibility={() => setSidebarVisible(false)} />
+      <Show when={!sidebarVisible()}>
+        <button class="sidebar-reopen-toggle" type="button" onClick={() => setSidebarVisible(true)} aria-label="显示侧栏" title="显示侧栏">›</button>
+      </Show>
       <section class="writer-canvas" aria-label="Markdown 写作区">
-        <div class="canvas-caption">
-          <button class="sidebar-visibility-toggle" type="button" onClick={() => setSidebarVisible((visible) => !visible)} aria-expanded={sidebarVisible()}>
-            {sidebarVisible() ? "隐藏侧栏" : "显示侧栏"}
-          </button>
-          <span class="canvas-caption-dot" />
-          <span>Markdown · GFM</span>
-          <span class="canvas-caption-separator">/</span>
-          <span>Muya 即时渲染</span>
-        </div>
         <Editor onReady={setEditor} />
       </section>
     </div>

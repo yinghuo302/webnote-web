@@ -126,6 +126,8 @@ function registerPlugins() {
 /** Application-facing adapter for Muya while file/save flows are migrated. */
 export class MuyaEditor implements IEditor {
   private root_ele: HTMLDivElement;
+  private editorPaper: HTMLElement;
+  private detachedVisualHost: DocumentFragment;
   private instance: Muya;
   private sourceShell: HTMLDivElement;
   private sourceGutter: HTMLDivElement;
@@ -206,6 +208,8 @@ export class MuyaEditor implements IEditor {
 
   constructor(root: HTMLDivElement, initial = "# 请输入标题") {
     this.root_ele = root;
+    this.editorPaper = (root.closest(".editor-paper") as HTMLElement | null) || root.parentElement!;
+    this.detachedVisualHost = document.createDocumentFragment();
     this.sourceShell = document.createElement("div");
     this.sourceShell.className = "markdown-source-shell";
     this.sourceShell.hidden = true;
@@ -275,16 +279,17 @@ export class MuyaEditor implements IEditor {
   getMode() { return this.mode; }
   setMode(mode: "visual" | "source") {
     if (mode === this.mode) return;
+    const paper = this.editorPaper;
     if (mode === "source") {
       this.sourceArea.value = this.instance.getMarkdown() || "";
       this.updateSourceGutter();
+      this.detachedVisualHost.appendChild(this.root_ele);
     } else {
+      paper?.insertBefore(this.root_ele, this.sourceShell);
       this.instance.setContent(this.sourceArea.value);
     }
     this.mode = mode;
-    const paper = this.root_ele.closest(".editor-paper") as HTMLElement | null;
     paper?.classList.toggle("is-source-mode", mode === "source");
-    this.root_ele.style.display = mode === "source" ? "none" : "";
     this.sourceShell.hidden = mode !== "source";
     this.sourceShell.style.display = mode === "source" ? "grid" : "none";
     document.body.classList.toggle("webnote-source-mode", mode === "source");
@@ -324,9 +329,10 @@ export class MuyaEditor implements IEditor {
   }
   destroy() {
     this.destroyed = true;
+    if (this.mode === "source") this.editorPaper.insertBefore(this.root_ele, this.sourceShell);
     this.instance?.off("json-change", this.onJsonChange);
     this.instance?.destroy();
-    this.root_ele.closest(".editor-paper")?.classList.remove("is-source-mode");
+    this.editorPaper.classList.remove("is-source-mode");
     document.body.classList.remove("webnote-source-mode");
     this.root_ele.style.removeProperty("display");
     this.sourceShell.remove();

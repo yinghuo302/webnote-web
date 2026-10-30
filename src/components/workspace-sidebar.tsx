@@ -16,7 +16,7 @@ type WorkspaceFile = {
   updatedAt?: number;
 };
 
-type Props = { editor?: IEditor; visible?: boolean };
+type Props = { editor?: IEditor; visible?: boolean; onToggleVisibility?: () => void };
 type PanelTab = "files" | "outline";
 const BLANK_MARKDOWN = "# 请输入标题";
 
@@ -468,7 +468,10 @@ export default function WorkspaceSidebar(props: Props) {
         <div>
           <h2>文档</h2>
         </div>
-        <span class="sidebar-count">{files().length}</span>
+        <div class="sidebar-heading-actions">
+          <span class="sidebar-count">{files().length}</span>
+          <button class="sidebar-visibility-toggle" type="button" onClick={props.onToggleVisibility} title="隐藏侧栏" aria-label="隐藏侧栏">‹</button>
+        </div>
       </div>
 
       <div class="sidebar-command-panel" aria-label="文档操作">
