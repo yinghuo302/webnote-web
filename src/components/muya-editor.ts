@@ -127,6 +127,8 @@ function registerPlugins() {
 export class MuyaEditor implements IEditor {
   private root_ele: HTMLDivElement;
   private instance: Muya;
+  private sourceShell: HTMLDivElement;
+  private sourceGutter: HTMLDivElement;
   private sourceArea: HTMLTextAreaElement;
   private mode: "visual" | "source" = "visual";
   private mermaidConversionQueued = false;
@@ -204,13 +206,33 @@ export class MuyaEditor implements IEditor {
 
   constructor(root: HTMLDivElement, initial = "# 请输入标题") {
     this.root_ele = root;
+    this.sourceShell = document.createElement("div");
+    this.sourceShell.className = "markdown-source-shell";
+    this.sourceShell.hidden = true;
+    this.sourceGutter = document.createElement("div");
+    this.sourceGutter.className = "markdown-source-gutter";
+    this.sourceGutter.setAttribute("aria-hidden", "true");
     this.sourceArea = document.createElement("textarea");
     this.sourceArea.className = "markdown-source-editor";
     this.sourceArea.setAttribute("aria-label", "Markdown 源码编辑器");
     this.sourceArea.spellcheck = false;
-    this.sourceArea.hidden = true;
-    root.insertAdjacentElement("afterend", this.sourceArea);
-    this.sourceArea.addEventListener("input", () => bus.emit("EditorChanged"));
+    this.sourceArea.wrap = "off";
+    this.sourceShell.append(this.sourceGutter, this.sourceArea);
+    root.insertAdjacentElement("afterend", this.sourceShell);
+    this.sourceArea.addEventListener("input", () => {
+      this.updateSourceGutter();
+      bus.emit("EditorChanged");
+    });
+    this.sourceArea.addEventListener("scroll", () => { this.sourceGutter.scrollTop = this.sourceArea.scrollTop; });
+    this.sourceArea.addEventListener("keydown", (event) => {
+      if (event.key === "Tab") {
+        event.preventDefault();
+        const start = this.sourceArea.selectionStart;
+        const end = this.sourceArea.selectionEnd;
+        this.sourceArea.setRangeText("  ", start, end, "end");
+        this.sourceArea.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    });
     registerPlugins();
     this.instance = new Muya(root, {
       markdown: "",
@@ -230,9 +252,15 @@ export class MuyaEditor implements IEditor {
     this.instance.setContent(initial || "");
   }
 
+  private updateSourceGutter() {
+    const lineCount = Math.max(1, this.sourceArea.value.split("\n").length);
+    this.sourceGutter.textContent = Array.from({ length: lineCount }, (_, index) => String(index + 1)).join("\n");
+  }
+
   setValue(markdown: string) {
     const value = markdown || "";
     this.sourceArea.value = value;
+    this.updateSourceGutter();
     this.instance?.setContent(value);
   }
   getMd() { return this.mode === "source" ? this.sourceArea.value : (this.instance?.getMarkdown() || ""); }
@@ -247,12 +275,18 @@ export class MuyaEditor implements IEditor {
   getMode() { return this.mode; }
   setMode(mode: "visual" | "source") {
     if (mode === this.mode) return;
-    if (mode === "source") this.sourceArea.value = this.instance.getMarkdown() || "";
-    else this.instance.setContent(this.sourceArea.value);
+    if (mode === "source") {
+      this.sourceArea.value = this.instance.getMarkdown() || "";
+      this.updateSourceGutter();
+    } else {
+      this.instance.setContent(this.sourceArea.value);
+    }
     this.mode = mode;
-    this.root_ele.style.setProperty("display", mode === "source" ? "none" : "", "important");
-    this.sourceArea.style.display = mode === "source" ? "block" : "none";
-    this.root_ele.parentElement?.classList.toggle("is-source-mode", mode === "source");
+    const paper = this.root_ele.closest(".editor-paper") as HTMLElement | null;
+    paper?.classList.toggle("is-source-mode", mode === "source");
+    this.root_ele.style.display = mode === "source" ? "none" : "";
+    this.sourceShell.hidden = mode !== "source";
+    this.sourceShell.style.display = mode === "source" ? "grid" : "none";
     document.body.classList.toggle("webnote-source-mode", mode === "source");
     if (mode === "source") this.sourceArea.focus();
     else this.instance.focus();
@@ -273,28 +307,29 @@ export class MuyaEditor implements IEditor {
       }
       return;
     }
-    const headings = this.root_ele.querySelectorAll<HTMLElement>(".mu-atx-heading, .mu-setext-heading, h1, h2, h3, h4, h5, h6");
-    const heading = headings[index];
-    if (!heading) return;
-    heading.scrollIntoView({ behavior: "auto", block: "center" });
-    requestAnimationFrame(() => {
-      const rect = heading.getBoundingClientRect();
-      const x = Math.min(rect.right - 4, Math.max(rect.left + 4, rect.left + 32));
-      const y = rect.top + Math.min(rect.height / 2, 20);
-      heading.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, clientX: x, clientY: y, buttons: 1 }));
-      heading.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, clientX: x, clientY: y }));
-      heading.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: x, clientY: y }));
+    const scrollPage = (this.instance.editor as any).scrollPage;
+    const topLevelHeadings = Array.from(scrollPage?.children?.iterator?.() || []) as any[];
+    const block = topLevelHeadings.filter((candidate) => candidate.blockName === "atx-heading" || candidate.blockName === "setext-heading")[index];
+    if (!block) return;
+    const heading = block.domNode as HTMLElement | undefined;
+    heading?.scrollIntoView({ behavior: "auto", block: "center" });
+    const content = block.firstContentInDescendant?.();
+    if (content?.setCursor) {
+      content.setCursor(0, 0, true);
       this.instance.focus();
-    });
+      return;
+    }
+    heading?.click();
+    this.instance.focus();
   }
   destroy() {
     this.destroyed = true;
     this.instance?.off("json-change", this.onJsonChange);
     this.instance?.destroy();
-    this.root_ele.parentElement?.classList.remove("is-source-mode");
+    this.root_ele.closest(".editor-paper")?.classList.remove("is-source-mode");
     document.body.classList.remove("webnote-source-mode");
     this.root_ele.style.removeProperty("display");
-    this.sourceArea.remove();
+    this.sourceShell.remove();
   }
 }
 
